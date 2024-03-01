@@ -1,0 +1,30 @@
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.self-end {
+  align-self: end;
+}
+
+.gap-1 {
+  gap: 1rem;
+}
+.gap-2 {
+  gap: 2rem;
+}
+
+.w-fit {
+  width: fit-content;
+}
+
+.text-lg {
+  font-size: 18px;
+}
+
+.w-full {
+  width: 100%;
+}
