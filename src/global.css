@@ -28,3 +28,7 @@
 .w-full {
   width: 100%;
 }
+
+.ml-1 {
+  margin-left: 10px;
+}

@@ -1,13 +1,18 @@
-import { Table, Tag } from "antd";
+import { Button, Popconfirm, Table, Tag } from "antd";
 import Search from "antd/es/input/Search";
 import { useFiches } from "../context/FichesContext";
 import {
   fetchFicheDetailByCode,
   fetchFicheFileListByCode,
+  fetchFiches,
   fetchFichesBySearch,
 } from "../services/fiches_service";
 import FicheDetailModal from "../components/modal/FIcheDetailModal";
 import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+import { fetchDownloadFiles, fetchRemoveFile } from "../services/file_service";
+import { saveAs } from "file-saver";
+import UpdateUnreadFileModal from "../components/modal/UpdateUnreadFileModal";
 
 function FichesPage() {
   const { user } = useAuth();
@@ -17,7 +22,11 @@ function FichesPage() {
     setFicheDetailIsOpen,
     setSelectedFiche,
     setSelectedFicheFileList,
+    setLinkFicheToFileIsOpen,
+    setSelectedFicheForLinkToFile,
+    linkFicheToFileIsOpen,
   } = useFiches();
+  const [loading, setLoading] = useState();
 
   async function openFicheModal(record) {
     const data = await fetchFicheDetailByCode(
@@ -39,6 +48,42 @@ function FichesPage() {
     const data = await fetchFichesBySearch(params, user.TOKEN);
     setFiches(data);
   }
+
+  async function downloadFile(param) {
+    const data = await fetchDownloadFiles(param, user.TOKEN);
+    const blob = new Blob([data], { type: "application/octet-stream" });
+    saveAs(blob, param);
+  }
+
+  async function deleteFiche(param) {
+    const res = await fetchRemoveFile(param, user.TOKEN);
+    getFiches();
+  }
+
+  async function openLinkedModal(record) {
+    setSelectedFicheForLinkToFile(record);
+    setLinkFicheToFileIsOpen(true);
+  }
+
+  const getFiches = async () => {
+    setLoading(true);
+    const data = await fetchFiches(user.TOKEN);
+    setTimeout(() => {
+      setFiches(data);
+      setLoading(false);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    getFiches();
+  }, []);
+
+  useEffect(() => {
+    if (!linkFicheToFileIsOpen) {
+      getFiches();
+    }
+  }, [linkFicheToFileIsOpen]);
+
   const columns = [
     {
       title: "NÖMRƏ",
@@ -46,13 +91,38 @@ function FichesPage() {
       key: "FICHENO",
       render: (_, record) => (
         <>
-          <span
-            style={{ color: "blue", cursor: "pointer" }}
-            onClick={() => openFicheModal(record)}
-            key={record.FICHENO}
-          >
-            {record.FICHENO}
-          </span>
+          {record.TRCODE === 0 ? (
+            <>
+              <span key={record.FICHENO}>{record.FICHENO}</span>
+              <Button
+                size="small"
+                type="primary"
+                className="ml-1"
+                onClick={() => openLinkedModal(record)}
+              >
+                Birləşdir
+              </Button>
+              <Popconfirm
+                title="Ləğv edilmə"
+                description="Mövcud fayl ləğv edilsin?"
+                onConfirm={() => deleteFiche(record)}
+                okText="Bəli"
+                cancelText="İmtina"
+              >
+                <Button size="small" type="primary" className="ml-1" danger>
+                  Ləğv et
+                </Button>
+              </Popconfirm>
+            </>
+          ) : (
+            <span
+              style={{ color: "blue", cursor: "pointer" }}
+              onClick={() => openFicheModal(record)}
+              key={record.FICHENO}
+            >
+              {record.FICHENO}
+            </span>
+          )}
         </>
       ),
     },
@@ -62,13 +132,13 @@ function FichesPage() {
       key: "TRCODE",
       render: (_, { TRCODE }) => (
         <>
-          {TRCODE === 8 ? (
+          {TRCODE !== 0 ? (
             <Tag color={"blue"} key={TRCODE}>
               {"SATIŞ"}
             </Tag>
           ) : (
             <Tag color={"blue"} key={TRCODE}>
-              {"QAYTARMA"}
+              0
             </Tag>
           )}
         </>
@@ -78,6 +148,32 @@ function FichesPage() {
       title: "FAYL ADI",
       dataIndex: "FILENAME",
       key: "FILENAME",
+      render: (_, record) => (
+        <>
+          {record.FILENAME}
+          {record.TRCODE === 0 ? (
+            <Button
+              size="small"
+              type="primary"
+              className="ml-1"
+              onClick={() => downloadFile(record.FILENAME)}
+            >
+              Yüklə
+            </Button>
+          ) : (
+            ""
+          )}
+        </>
+      ),
+    },
+    {
+      title: "TARİX",
+      dataIndex: "INSERT_DATE",
+      key: "INSERT_DATE",
+      render: (_, { INSERT_DATE }) => (
+        <>{new Date(INSERT_DATE).toLocaleDateString("az")}</>
+      ),
+      sorter: (a, b) => a.INSERT_DATE - b.INSERT_DATE,
     },
     {
       title: "STATUS",
@@ -98,6 +194,7 @@ function FichesPage() {
       ),
     },
   ];
+
   return (
     <div>
       <div>
@@ -115,13 +212,13 @@ function FichesPage() {
 
         <Table
           columns={columns}
-          dataSource={fiches.filter(
-            (record) => record.READ_STATUS === 1 && record.STATUS === 0
-          )}
+          dataSource={fiches}
           rowKey={(record) => record.ID}
+          loading={loading}
         />
       </div>
       <FicheDetailModal />
+      <UpdateUnreadFileModal />
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { useFiches } from "../context/FichesContext";
 import LinkFileToFicheModal from "../components/modal/LinkFileToFicheModal";
 import { useAuth } from "../context/AuthContext";
 
-function UploaderPage() {
+function ConfirmedDocumentPage() {
   const { user } = useAuth();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -97,6 +97,11 @@ function UploaderPage() {
       key: "DEFINITION_",
     },
     {
+      title: "Təslimat",
+      dataIndex: "TESLIMAT",
+      key: "TESLIMAT",
+    },
+    {
       title: "Məbləğ",
       dataIndex: "NETTOTAL",
       key: "NETTOTAL",
@@ -157,4 +162,4 @@ function UploaderPage() {
   );
 }
 
-export default UploaderPage;
+export default ConfirmedDocumentPage;

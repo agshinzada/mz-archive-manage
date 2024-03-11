@@ -1,13 +1,19 @@
-import { Button, Table, Tag } from "antd";
+import { Avatar, Badge, Button, Table, Tag } from "antd";
 import { fetchFiches } from "../services/fiches_service";
 import { useEffect, useState } from "react";
-import { useFiches } from "../context/FichesContext";
 import { useAuth } from "../context/AuthContext";
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
 function ProcessingPage() {
   const { user } = useAuth();
-  const { fiches, setFiches } = useFiches();
+  const [fiches, setFiches] = useState([]);
   const [loading, setLoading] = useState(false);
+  let successProcess = fiches.filter(
+    (record) => record.READ_STATUS === 1
+  ).length;
+  let unreadProcess = fiches.filter(
+    (record) => record.READ_STATUS === 0
+  ).length;
 
   const getFiches = async () => {
     setLoading(true);
@@ -59,9 +65,9 @@ function ProcessingPage() {
           ) : (
             ""
           )}
-          {TRCODE === null ? (
+          {TRCODE === 0 ? (
             <Tag color={"red"} key={TRCODE}>
-              {"OXUNMADI"}
+              0
             </Tag>
           ) : (
             ""
@@ -95,15 +101,51 @@ function ProcessingPage() {
   ];
   return (
     <div className="flex flex-col gap-2">
-      <Button
-        type="primary"
-        size="large"
-        className="w-fit self-end"
-        loading={loading}
-        onClick={getFiches}
-      >
-        Yenilə
-      </Button>
+      <div className="flex gap-2 self-end">
+        <div className="flex gap-1">
+          <Badge count={successProcess}>
+            <Avatar
+              shape="square"
+              size="large"
+              style={{ backgroundColor: "blue", cursor: "pointer" }}
+              icon={<CheckOutlined />}
+              onClick={async () => {
+                const data = await fetchFiches(user.TOKEN);
+                const filtered = data.filter(
+                  (record) => record.READ_STATUS === 1
+                );
+                setFiches(filtered);
+              }}
+            />
+          </Badge>
+          <Badge count={unreadProcess}>
+            <Avatar
+              shape="square"
+              size="large"
+              icon={<CloseOutlined />}
+              style={{ backgroundColor: "red", cursor: "pointer" }}
+              onClick={async () => {
+                const data = await fetchFiches(user.TOKEN);
+                const filtered = data.filter(
+                  (record) => record.READ_STATUS === 0
+                );
+                setFiches(filtered);
+              }}
+            />
+          </Badge>
+        </div>
+
+        <Button
+          type="primary"
+          size="large"
+          className="w-fit"
+          loading={loading}
+          onClick={getFiches}
+        >
+          Yenilə
+        </Button>
+      </div>
+
       <div className="flex flex-col gap-1">
         <p className="label_process">SKAN EDİLƏNLƏR</p>
         <div className="flex flex-col gap-1">

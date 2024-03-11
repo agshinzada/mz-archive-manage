@@ -19,8 +19,13 @@ function MainLayout({ children }) {
     },
     {
       key: 3,
-      label: "Sistemə yüklə",
-      target: "/uploader",
+      label: "Təsdiqlənmiş sənədlər",
+      target: "/invoices/approved",
+    },
+    {
+      key: 4,
+      label: "Təsdiq gözləyən sənədlər",
+      target: "/invoices/unconfirmed",
     },
   ];
 
@@ -51,9 +56,10 @@ function MainLayout({ children }) {
           alignItems: "center",
         }}
       >
-        <div className="demo-logo" />
-        <img src="/logo.svg" style={{ width: "24px", marginRight: "7px" }} />
-        <p className={styles.logo}>archive</p>
+        <a href="/" className={styles.logo}>
+          <img src="/logo.svg" style={{ width: "24px", marginRight: "7px" }} />
+          <p>archive</p>
+        </a>
         <Menu
           theme="dark"
           mode="horizontal"

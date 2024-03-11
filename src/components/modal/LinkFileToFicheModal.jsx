@@ -3,7 +3,7 @@ import styles from "./modal.module.css";
 import { UploadOutlined } from "@ant-design/icons";
 import { useFiches } from "../../context/FichesContext";
 import { useState } from "react";
-import { fetchUploadFiles } from "../../services/upload_service";
+import { fetchUploadFiles } from "../../services/file_service";
 import { useAuth } from "../../context/AuthContext";
 
 function LinkFileToFicheModal({ getData }) {
@@ -22,22 +22,23 @@ function LinkFileToFicheModal({ getData }) {
     formData.append("ficheno", selectedUnlinkFiche.FICHENO);
     formData.append("type", selectedUnlinkFiche.TRCODE);
     formData.append("token", user.TOKEN);
+    formData.append("readstatus", 1);
     setUploading(true);
     const res = await fetchUploadFiles(formData);
-    setTimeout(() => {
+    setTimeout(async () => {
       if (res.status === 200) {
         setFileList([]);
         notification.success({
           placement: "topRight",
           message: "Sənəd düzəlişi",
-          description: "Fayl uğurla yükləndi!",
+          description: await res.text(),
         });
         getData();
       } else {
         notification.error({
           placement: "topRight",
           message: "Sənəd düzəlişi",
-          description: "API qoşulma uğursuz!",
+          description: await res.text(),
         });
       }
       setUploading(false);

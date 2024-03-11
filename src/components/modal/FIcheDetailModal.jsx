@@ -7,11 +7,11 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
+import { fetchDownloadFiles } from "../../services/file_service";
 
 function FicheDetailModal() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [fileData, setFileData] = useState([]);
 
   const {
     ficheDetailIsOpen,
@@ -24,14 +24,13 @@ function FicheDetailModal() {
     try {
       const zip = new JSZip();
       for (const iterator of selectedFicheFileList) {
-        const res = await axios(
-          `http://localhost:5180/api/files/download?name=${iterator.FILENAME}&token=${user.TOKEN}`,
-          {
-            responseType: "arraybuffer",
-          }
+        const fileData = await fetchDownloadFiles(
+          iterator.FILENAME,
+          user.TOKEN
         );
-        const fileData = await res.data;
-        zip.file(iterator.FILENAME, fileData);
+        if (fileData) {
+          zip.file(iterator.FILENAME, fileData);
+        }
       }
       const zipBlob = await zip.generateAsync({ type: "blob" });
       saveAs(zipBlob, selectedFiche?.FICHENO);
