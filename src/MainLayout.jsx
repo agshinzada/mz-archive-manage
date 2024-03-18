@@ -1,46 +1,17 @@
-import { Breadcrumb, Button, Layout, Menu, theme } from "antd";
+import { Layout, theme } from "antd";
 import { Content, Footer, Header } from "antd/es/layout/layout";
 import styles from "./layout.module.css";
-import { useNavigate } from "react-router-dom";
-import { encryptStorage } from "./components/utils/storage";
+import MenuWare from "./components/menu/MenuWare";
+import MenuAcc from "./components/menu/MenuAcc";
 
-function MainLayout({ children }) {
-  const navigate = useNavigate();
-  const menuItems = [
-    {
-      key: 1,
-      label: "Processing",
-      target: "/",
-    },
-    {
-      key: 2,
-      label: "Sənədlər",
-      target: "/invoices",
-    },
-    {
-      key: 3,
-      label: "Təsdiqlənmiş sənədlər",
-      target: "/invoices/approved",
-    },
-    {
-      key: 4,
-      label: "Təsdiq gözləyən sənədlər",
-      target: "/invoices/unconfirmed",
-    },
-  ];
-
-  const handleMenuClick = ({ key }) => {
-    const { target } = menuItems.find((item) => item.key == key) || {};
-    if (target) {
-      navigate(target);
+function MainLayout({ children, type }) {
+  function getMenu() {
+    if (type === "ware") {
+      return <MenuWare />;
+    } else if (type === "acc") {
+      return <MenuAcc />;
     }
-  };
-
-  function handleLogout() {
-    encryptStorage.clear();
-    navigate("auth/login");
   }
-
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -60,18 +31,7 @@ function MainLayout({ children }) {
           <img src="/logo.svg" style={{ width: "24px", marginRight: "7px" }} />
           <p>archive</p>
         </a>
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          defaultSelectedKeys={["1"]}
-          onClick={handleMenuClick}
-          items={menuItems}
-          style={{
-            flex: 1,
-            minWidth: 0,
-          }}
-        />
-        <Button onClick={handleLogout}>Çıxış</Button>
+        {getMenu()}
       </Header>
       <Content
         style={{

@@ -10,6 +10,10 @@
   align-self: end;
 }
 
+.justify-self-end {
+  justify-self: end;
+}
+
 .gap-1 {
   gap: 1rem;
 }
@@ -31,4 +35,16 @@
 
 .ml-1 {
   margin-left: 10px;
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-col-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.bg-gray {
+  background-color: #c3c3bb;
 }

@@ -45,6 +45,7 @@ function LinkFileToFicheModal({ getData }) {
       setLinkFileIsOpen(false);
     }, 1000);
   };
+
   const props = {
     onRemove: (file) => {
       const index = fileList.indexOf(file);

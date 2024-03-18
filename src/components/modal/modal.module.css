@@ -39,3 +39,9 @@
 .grid p {
   font-size: 15px;
 }
+
+.p {
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1rem;
+}

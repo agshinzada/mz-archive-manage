@@ -39,3 +39,48 @@
 .footer_img {
   width: 13%;
 }
+
+.box1 {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.routes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  width: fit-content;
+  gap: 1rem;
+}
+
+.route {
+  padding: 2rem 4rem;
+  border: 1px solid rgb(204, 201, 201);
+  border-radius: 0.5rem;
+  text-align: center;
+  transition: background-color 0.5s;
+}
+
+.route:hover {
+  background-color: #d3d0d0;
+}
+
+.logo {
+  display: flex;
+  font-size: 1.2rem;
+  padding: 1rem;
+  color: blue;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-right: 2rem;
+}
+
+.backButton {
+  width: fit-content;
+  position: absolute;
+  top: 2rem;
+  left: 1rem;
+}

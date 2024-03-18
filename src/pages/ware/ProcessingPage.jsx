@@ -1,7 +1,7 @@
 import { Avatar, Badge, Button, Table, Tag } from "antd";
-import { fetchFiches } from "../services/fiches_service";
+import { fetchFiches } from "../../services/fiches_service";
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
 function ProcessingPage() {
@@ -21,7 +21,7 @@ function ProcessingPage() {
     setTimeout(() => {
       setFiches(data);
       setLoading(false);
-    }, 1000);
+    }, 500);
   };
 
   useEffect(() => {

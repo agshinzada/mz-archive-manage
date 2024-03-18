@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import {
   fetchUnConfirmedFiches,
   fetchUnConfirmedFichesBySearch,
-} from "../services/fiches_service";
-import LinkFileToFicheModal from "../components/modal/LinkFileToFicheModal";
-import { useAuth } from "../context/AuthContext";
+} from "../../services/fiches_service";
+import LinkFileToFicheModal from "../../components/modal/LinkFileToFicheModal";
+import { useAuth } from "../../context/AuthContext";
 
 function UnConfirmedDocumentPage() {
   const { user } = useAuth();
@@ -20,7 +20,7 @@ function UnConfirmedDocumentPage() {
     setTimeout(() => {
       setDataSource(data);
       setLoading(false);
-    }, 1000);
+    }, 500);
   };
 
   const onSearch = async (e) => {

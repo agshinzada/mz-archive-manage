@@ -1,18 +1,21 @@
 import { Button, Popconfirm, Table, Tag } from "antd";
 import Search from "antd/es/input/Search";
-import { useFiches } from "../context/FichesContext";
+import { useFiches } from "../../context/FichesContext";
 import {
   fetchFicheDetailByCode,
   fetchFicheFileListByCode,
   fetchFiches,
   fetchFichesBySearch,
-} from "../services/fiches_service";
-import FicheDetailModal from "../components/modal/FIcheDetailModal";
-import { useAuth } from "../context/AuthContext";
+} from "../../services/fiches_service";
+import FicheDetailModal from "../../components/modal/FIcheDetailModal";
+import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
-import { fetchDownloadFiles, fetchRemoveFile } from "../services/file_service";
+import {
+  fetchDownloadFiles,
+  fetchRemoveFile,
+} from "../../services/file_service";
 import { saveAs } from "file-saver";
-import UpdateUnreadFileModal from "../components/modal/UpdateUnreadFileModal";
+import UpdateUnreadFileModal from "../../components/modal/UpdateUnreadFileModal";
 
 function FichesPage() {
   const { user } = useAuth();
@@ -71,7 +74,7 @@ function FichesPage() {
     setTimeout(() => {
       setFiches(data);
       setLoading(false);
-    }, 1000);
+    }, 500);
   };
 
   useEffect(() => {

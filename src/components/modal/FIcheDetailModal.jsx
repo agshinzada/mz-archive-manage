@@ -5,7 +5,6 @@ import { DownloadOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { fetchDownloadFiles } from "../../services/file_service";
 

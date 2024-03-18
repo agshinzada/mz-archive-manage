@@ -4,7 +4,25 @@ import axios from "axios";
 export async function fetchUploadFiles(data) {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_APP_API}/files/upload/manual`,
+      `${import.meta.env.VITE_APP_API}/files/upload/invoice`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      `Error occurred while sending file copy for to the API:`,
+      error
+    );
+  }
+}
+
+export async function fetchUploadContractFiles(data) {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_APP_API}/files/upload/contract`,
       {
         method: "POST",
         body: data,
@@ -25,6 +43,35 @@ export async function fetchDownloadFiles(fileName, token) {
       `${
         import.meta.env.VITE_APP_API
       }/files/download?name=${fileName}&token=${token}`,
+      {
+        responseType: "arraybuffer",
+      }
+    );
+    if (res.status === 200) {
+      const data = await res.data;
+      return data;
+    } else {
+      notification.error({
+        placement: "topRight",
+        message: "Sistem xətası",
+        description: await res.text(),
+      });
+    }
+    return false;
+  } catch (error) {
+    console.error(
+      `Error occurred while sending file copy for to the API:`,
+      error
+    );
+  }
+}
+
+export async function fetchDownloadContractFile(fileName, token) {
+  try {
+    const res = await axios(
+      `${
+        import.meta.env.VITE_APP_API
+      }/files/contract/download?name=${fileName}&token=${token}`,
       {
         responseType: "arraybuffer",
       }

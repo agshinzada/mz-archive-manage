@@ -1,12 +1,13 @@
 import { Footer } from "antd/es/layout/layout";
 
-function MainFooter() {
+function MainFooter({ props }) {
   return (
     <Footer
       style={{
         textAlign: "center",
         padding: "1rem",
       }}
+      {...props}
     >
       Mazarina Trade Company ©{new Date().getFullYear()} Powered by{" "}
       <a href="https://agshin.dev/" style={{ fontWeight: 700 }}>

@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import {
   fetchUnlinkFiches,
   fetchUnlinkFichesBySearch,
-} from "../services/fiches_service";
-import { useFiches } from "../context/FichesContext";
-import LinkFileToFicheModal from "../components/modal/LinkFileToFicheModal";
-import { useAuth } from "../context/AuthContext";
+} from "../../services/fiches_service";
+import { useFiches } from "../../context/FichesContext";
+import LinkFileToFicheModal from "../../components/modal/LinkFileToFicheModal";
+import { useAuth } from "../../context/AuthContext";
 
 function ConfirmedDocumentPage() {
   const { user } = useAuth();
@@ -22,7 +22,7 @@ function ConfirmedDocumentPage() {
     setTimeout(() => {
       setDataSource(data);
       setLoading(false);
-    }, 1000);
+    }, 500);
   };
 
   const onSearch = async (e) => {

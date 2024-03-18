@@ -7,28 +7,33 @@ import { fetchUserLogin } from "../services/user_service";
 import { useAuth } from "../context/AuthContext";
 import { encryptStorage } from "../components/utils/storage";
 import { sha256 } from "hash.js";
+import { CaretLeftOutlined } from "@ant-design/icons";
 // import { useAuth } from "../../context/AuthContext";
 
 function LoginPage() {
-  const { setUser } = useAuth();
+  const { setUser, routePath } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleLogin(e) {
+  async function handleLogin() {
     try {
       setLoading(true);
-      const data = await fetchUserLogin(username, password);
-      if (data) {
-        setUser(data);
-        encryptStorage.setItem("user", data);
-        setTimeout(() => {
+      if (routePath) {
+        const data = await fetchUserLogin(username, password);
+        if (data) {
+          setUser(data);
+          encryptStorage.setItem(`${routePath}User`, data);
+          setTimeout(() => {
+            setLoading(false);
+            navigate("/" + routePath);
+          }, 1000);
+        } else {
           setLoading(false);
-          navigate("/");
-        }, 1000);
+        }
       } else {
-        setLoading(false);
+        navigate("/");
       }
     } catch (error) {
       message.error("Login error");
@@ -38,6 +43,13 @@ function LoginPage() {
 
   return (
     <div className={styles.box}>
+      <Button
+        icon={<CaretLeftOutlined />}
+        className={styles.backButton}
+        onClick={() => navigate("/")}
+      >
+        Geri
+      </Button>
       <div className={styles.login_box}>
         <p className={styles.title}>Giriş</p>
         <Form
