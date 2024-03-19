@@ -1,13 +1,12 @@
 import { Button, Modal, Upload, notification } from "antd";
 import styles from "../modal.module.css";
-import { DownloadOutlined, UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import {
   fetchDownloadContractFile,
   fetchUploadContractFiles,
 } from "../../../services/file_service";
-import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
 function ClientDetailModal({ isOpen, setIsOpen, selectedClient, clientFiles }) {

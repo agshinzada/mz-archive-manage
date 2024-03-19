@@ -150,7 +150,7 @@ function ClientsPage() {
 
   useEffect(() => {
     if (!isOpen) {
-      getClients();
+      getClients(true);
     }
   }, [isOpen]);
 
