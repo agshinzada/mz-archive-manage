@@ -16,6 +16,9 @@ import RoutePage from "./pages/RoutePage.jsx";
 import AccountingApp from "./AccountApp.jsx";
 import PrivateRouteAcc from "./components/PrivateRouteAcc.jsx";
 import ClientsPage from "./pages/acc/ClientsPage.jsx";
+import TechApp from "./TechApp.jsx";
+import ActPage from "./pages/tech/ActPage.jsx";
+import HandoverPage from "./pages/tech/HandoverPage.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -62,11 +65,33 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "/tech",
+    element: (
+      <PrivateRouteAcc>
+        <TechApp />
+      </PrivateRouteAcc>
+    ),
+    children: [
+      {
+        index: true,
+        element: <ActPage />,
+      },
+      {
+        path: "handover",
+        element: <HandoverPage />,
+      },
+    ],
+  },
+  {
     path: "ware/auth/login",
     element: <LoginPage />,
   },
   {
     path: "acc/auth/login",
+    element: <LoginPage />,
+  },
+  {
+    path: "tech/auth/login",
     element: <LoginPage />,
   },
 ]);

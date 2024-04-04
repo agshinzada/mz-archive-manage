@@ -3,6 +3,7 @@ import { Content, Footer, Header } from "antd/es/layout/layout";
 import styles from "./layout.module.css";
 import MenuWare from "./components/menu/MenuWare";
 import MenuAcc from "./components/menu/MenuAcc";
+import MenuTech from "./components/menu/MenuTech";
 
 function MainLayout({ children, type }) {
   function getMenu() {
@@ -10,6 +11,8 @@ function MainLayout({ children, type }) {
       return <MenuWare />;
     } else if (type === "acc") {
       return <MenuAcc />;
+    } else if (type === "tech") {
+      return <MenuTech />;
     }
   }
   const {

@@ -29,6 +29,15 @@ function RoutePage() {
         >
           Mühasibatlıq
         </a>
+        <a
+          href="/tech"
+          className={styles.route}
+          onClick={() => {
+            encryptStorage.setItem("routePath", "tech");
+          }}
+        >
+          Tech
+        </a>
         {/* <div className={styles.route}>
           <a href="/">Yeni müştəri</a>
         </div>

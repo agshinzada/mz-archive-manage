@@ -36,6 +36,41 @@ export async function fetchUploadContractFiles(data) {
     );
   }
 }
+export async function fetchUploadActFiles(data) {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_APP_API}/files/upload/act`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      `Error occurred while sending file copy for to the API:`,
+      error
+    );
+  }
+}
+
+export async function fetchUploadHandoverFiles(data) {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_APP_API}/files/upload/handover`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      `Error occurred while sending file copy for to the API:`,
+      error
+    );
+  }
+}
 
 export async function fetchDownloadFiles(fileName, token) {
   try {
@@ -72,6 +107,64 @@ export async function fetchDownloadContractFile(fileName, token) {
       `${
         import.meta.env.VITE_APP_API
       }/files/contract/download?name=${fileName}&token=${token}`,
+      {
+        responseType: "arraybuffer",
+      }
+    );
+    if (res.status === 200) {
+      const data = await res.data;
+      return data;
+    } else {
+      notification.error({
+        placement: "topRight",
+        message: "Sistem xətası",
+        description: await res.text(),
+      });
+    }
+    return false;
+  } catch (error) {
+    console.error(
+      `Error occurred while sending file copy for to the API:`,
+      error
+    );
+  }
+}
+
+export async function fetchDownloadActFiles(fileName, token) {
+  try {
+    const res = await axios(
+      `${
+        import.meta.env.VITE_APP_API
+      }/files/acts/download?name=${fileName}&token=${token}`,
+      {
+        responseType: "arraybuffer",
+      }
+    );
+    if (res.status === 200) {
+      const data = await res.data;
+      return data;
+    } else {
+      notification.error({
+        placement: "topRight",
+        message: "Sistem xətası",
+        description: await res.text(),
+      });
+    }
+    return false;
+  } catch (error) {
+    console.error(
+      `Error occurred while sending file copy for to the API:`,
+      error
+    );
+  }
+}
+
+export async function fetchDownloadHandoverFiles(fileName, token) {
+  try {
+    const res = await axios(
+      `${
+        import.meta.env.VITE_APP_API
+      }/files/handovers/download?name=${fileName}&token=${token}`,
       {
         responseType: "arraybuffer",
       }
