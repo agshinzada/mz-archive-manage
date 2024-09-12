@@ -1,8 +1,13 @@
-import { Avatar, Badge, Button, Table, Tag } from "antd";
-import { fetchFiches } from "../../services/fiches_service";
+import { Avatar, Badge, Button, DatePicker, Table, Tag } from "antd";
+import {
+  fetchFiches,
+  fetchProcessingFiches,
+  fetchProcessingFichesByRange,
+} from "../../services/fiches_service";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+const { RangePicker } = DatePicker;
 
 function ProcessingPage() {
   const { user } = useAuth();
@@ -17,11 +22,19 @@ function ProcessingPage() {
 
   const getFiches = async () => {
     setLoading(true);
-    const data = await fetchFiches(user.TOKEN);
-    setTimeout(() => {
-      setFiches(data);
-      setLoading(false);
-    }, 500);
+    const data = await fetchProcessingFiches(user.TOKEN);
+    setFiches(data);
+    setLoading(false);
+  };
+
+  const handleRange = async (range) => {
+    if (range[0] === "") {
+      getFiches();
+    }
+    setLoading(true);
+    const data = await fetchProcessingFichesByRange({ ...range }, user.TOKEN);
+    setFiches(data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -101,9 +114,15 @@ function ProcessingPage() {
   ];
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2 self-end">
+      <div className="flex gap-2 justify-between">
         <div className="flex gap-1">
-          <Badge count={successProcess}>
+          <RangePicker
+            placeholder={["Başlanğıc", "Son"]}
+            onChange={(_, info) => handleRange(info)}
+          />
+        </div>
+        <div className="flex gap-1">
+          <Badge count={successProcess} overflowCount={5000}>
             <Avatar
               shape="square"
               size="large"
@@ -118,7 +137,7 @@ function ProcessingPage() {
               }}
             />
           </Badge>
-          <Badge count={unreadProcess}>
+          <Badge count={unreadProcess} overflowCount={5000}>
             <Avatar
               shape="square"
               size="large"
@@ -133,17 +152,16 @@ function ProcessingPage() {
               }}
             />
           </Badge>
+          <Button
+            type="primary"
+            size="large"
+            className="w-fit"
+            loading={loading}
+            onClick={getFiches}
+          >
+            Yenilə
+          </Button>
         </div>
-
-        <Button
-          type="primary"
-          size="large"
-          className="w-fit"
-          loading={loading}
-          onClick={getFiches}
-        >
-          Yenilə
-        </Button>
       </div>
 
       <div className="flex flex-col gap-1">

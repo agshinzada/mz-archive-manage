@@ -1,10 +1,11 @@
-import { Button, Popconfirm, Table, Tag } from "antd";
+import { Button, DatePicker, Popconfirm, Select, Table, Tag } from "antd";
 import Search from "antd/es/input/Search";
 import { useFiches } from "../../context/FichesContext";
 import {
   fetchFicheDetailByCode,
   fetchFicheFileListByCode,
   fetchFiches,
+  fetchFichesByRange,
   fetchFichesBySearch,
 } from "../../services/fiches_service";
 import FicheDetailModal from "../../components/modal/FIcheDetailModal";
@@ -16,6 +17,7 @@ import {
 } from "../../services/file_service";
 import { saveAs } from "file-saver";
 import UpdateUnreadFileModal from "../../components/modal/UpdateUnreadFileModal";
+const { RangePicker } = DatePicker;
 
 function FichesPage() {
   const { user } = useAuth();
@@ -30,6 +32,13 @@ function FichesPage() {
     linkFicheToFileIsOpen,
   } = useFiches();
   const [loading, setLoading] = useState();
+
+  const getFiches = async () => {
+    setLoading(true);
+    const data = await fetchFiches(user.TOKEN);
+    setFiches(data);
+    setLoading(false);
+  };
 
   async function openFicheModal(record) {
     const data = await fetchFicheDetailByCode(
@@ -63,19 +72,20 @@ function FichesPage() {
     getFiches();
   }
 
+  async function handleRange(range) {
+    if (range[0] === "") {
+      getFiches();
+    }
+    setLoading(true);
+    const data = await fetchFichesByRange({ ...range }, user.TOKEN);
+    setFiches(data);
+    setLoading(false);
+  }
+
   async function openLinkedModal(record) {
     setSelectedFicheForLinkToFile(record);
     setLinkFicheToFileIsOpen(true);
   }
-
-  const getFiches = async () => {
-    setLoading(true);
-    const data = await fetchFiches(user.TOKEN);
-    setTimeout(() => {
-      setFiches(data);
-      setLoading(false);
-    }, 500);
-  };
 
   useEffect(() => {
     getFiches();
@@ -201,23 +211,32 @@ function FichesPage() {
   return (
     <div>
       <div>
-        <label>Axtarış</label>
-
-        <Search
-          placeholder="İrsaliyə nömrəsi"
-          onSearch={onSearch}
-          style={{
-            width: "100%",
-            marginTop: "5px",
-          }}
-          size="large"
-        />
+        <div className="flex gap-1 justify-between mb-2 items-center">
+          <div>
+            <label>Axtarış</label>
+            <Search
+              placeholder="İrsaliyə nömrəsi"
+              onSearch={onSearch}
+              style={{
+                marginTop: "5px",
+              }}
+              size="middle"
+            />
+          </div>
+          <div className="flex gap-1">
+            <RangePicker
+              placeholder={["Başlanğıc", "Son"]}
+              onChange={(_, info) => handleRange(info)}
+            />
+          </div>
+        </div>
 
         <Table
           columns={columns}
           dataSource={fiches}
           rowKey={(record) => record.ID}
           loading={loading}
+          pagination={{ pageSize: 50 }}
         />
       </div>
       <FicheDetailModal />

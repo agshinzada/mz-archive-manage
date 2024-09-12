@@ -9,9 +9,16 @@
 .self-end {
   align-self: end;
 }
+.items-center {
+  align-items: center;
+}
 
 .justify-self-end {
   justify-self: end;
+}
+
+.justify-between {
+  justify-content: space-between;
 }
 
 .gap-1 {
@@ -47,4 +54,8 @@
 
 .bg-gray {
   background-color: #c3c3bb;
+}
+
+.mb-2 {
+  margin-bottom: 1.5rem;
 }

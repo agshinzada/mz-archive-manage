@@ -1,12 +1,14 @@
-import { Button, Table, Tag } from "antd";
+import { DatePicker, Table, Tag } from "antd";
 import Search from "antd/es/input/Search";
 import { useEffect, useState } from "react";
 import {
   fetchUnConfirmedFiches,
+  fetchUnConfirmedFichesByRange,
   fetchUnConfirmedFichesBySearch,
 } from "../../services/fiches_service";
 import LinkFileToFicheModal from "../../components/modal/LinkFileToFicheModal";
 import { useAuth } from "../../context/AuthContext";
+const { RangePicker } = DatePicker;
 
 function UnConfirmedDocumentPage() {
   const { user } = useAuth();
@@ -16,11 +18,18 @@ function UnConfirmedDocumentPage() {
   const getFiches = async () => {
     setLoading(true);
     const data = await fetchUnConfirmedFiches(user.TOKEN);
+    setDataSource(data);
+    setLoading(false);
+  };
 
-    setTimeout(() => {
-      setDataSource(data);
-      setLoading(false);
-    }, 500);
+  const handleRange = async (range) => {
+    if (range[0] === "") {
+      getFiches();
+    }
+    setLoading(true);
+    const data = await fetchUnConfirmedFichesByRange({ ...range }, user.TOKEN);
+    setDataSource(data);
+    setLoading(false);
   };
 
   const onSearch = async (e) => {
@@ -102,29 +111,25 @@ function UnConfirmedDocumentPage() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
-        <div className="w-full">
+      <div className="flex gap-2 justify-between items-center">
+        <div>
           <label>Axtarış</label>
           <Search
             placeholder="İrsaliyə nömrəsi"
             onSearch={onSearch}
             style={{
-              width: "100%",
               marginTop: "5px",
             }}
-            size="large"
+            size="middle"
           />
         </div>
 
-        <Button
-          type="primary"
-          size="large"
-          className="w-fit self-end"
-          loading={loading}
-          onClick={getFiches}
-        >
-          Yenilə
-        </Button>
+        <div className="flex gap-1">
+          <RangePicker
+            placeholder={["Başlanğıc", "Son"]}
+            onChange={(_, info) => handleRange(info)}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -133,7 +138,7 @@ function UnConfirmedDocumentPage() {
           <Table
             columns={columns}
             dataSource={dataSource}
-            pagination={false}
+            pagination={{ pageSize: 100 }}
             rowKey={(record) => record.LOGICALREF}
             loading={loading}
           />

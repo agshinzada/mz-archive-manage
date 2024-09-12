@@ -1,13 +1,15 @@
-import { Button, Table, Tag } from "antd";
+import { DatePicker, Table, Tag } from "antd";
 import Search from "antd/es/input/Search";
 import { useEffect, useState } from "react";
 import {
   fetchUnlinkFiches,
+  fetchUnlinkFichesByRange,
   fetchUnlinkFichesBySearch,
 } from "../../services/fiches_service";
 import { useFiches } from "../../context/FichesContext";
 import LinkFileToFicheModal from "../../components/modal/LinkFileToFicheModal";
 import { useAuth } from "../../context/AuthContext";
+const { RangePicker } = DatePicker;
 
 function ConfirmedDocumentPage() {
   const { user } = useAuth();
@@ -18,16 +20,23 @@ function ConfirmedDocumentPage() {
   const getFiches = async () => {
     setLoading(true);
     const data = await fetchUnlinkFiches(user.TOKEN);
-
-    setTimeout(() => {
-      setDataSource(data);
-      setLoading(false);
-    }, 500);
+    setDataSource(data);
+    setLoading(false);
   };
 
   const onSearch = async (e) => {
     const data = await fetchUnlinkFichesBySearch(e, user.TOKEN);
     setDataSource(data);
+  };
+
+  const handleRange = async (range) => {
+    if (range[0] === "") {
+      getFiches();
+    }
+    setLoading(true);
+    const data = await fetchUnlinkFichesByRange({ ...range }, user.TOKEN);
+    setDataSource(data);
+    setLoading(false);
   };
 
   const openFicheModal = async (record) => {
@@ -120,29 +129,25 @@ function ConfirmedDocumentPage() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
-        <div className="w-full">
+      <div className="flex gap-2 justify-between items-center">
+        <div>
           <label>Axtarış</label>
           <Search
             placeholder="İrsaliyə nömrəsi"
             onSearch={onSearch}
             style={{
-              width: "100%",
               marginTop: "5px",
             }}
-            size="large"
+            size="middle"
           />
         </div>
 
-        <Button
-          type="primary"
-          size="large"
-          className="w-fit self-end"
-          loading={loading}
-          onClick={getFiches}
-        >
-          Yenilə
-        </Button>
+        <div className="flex gap-1">
+          <RangePicker
+            placeholder={["Başlanğıc", "Son"]}
+            onChange={(_, info) => handleRange(info)}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -151,7 +156,7 @@ function ConfirmedDocumentPage() {
           <Table
             columns={columns}
             dataSource={dataSource}
-            pagination={false}
+            pagination={{ pageSize: 100 }}
             rowKey={(record) => record.LOGICALREF}
             loading={loading}
           />
