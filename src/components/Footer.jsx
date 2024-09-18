@@ -6,13 +6,15 @@ function MainFooter({ props }) {
       style={{
         textAlign: "center",
         padding: "1rem",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
       }}
       {...props}
     >
-      Mazarina Trade Company ©{new Date().getFullYear()} Powered by{" "}
-      <a href="https://agshin.dev/" style={{ fontWeight: 700 }}>
-        agshin
-        <span style={{ color: "#6E06F2", fontSize: "17px" }}>.dev</span>
+      Mazarina Trade Company ©{new Date().getFullYear()}
+      <a href="https://agshin.dev/">
+        <img src="/powered.svg" alt="logo" style={{ width: "80px" }} />
       </a>
     </Footer>
   );

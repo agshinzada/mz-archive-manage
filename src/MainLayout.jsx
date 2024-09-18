@@ -4,6 +4,7 @@ import styles from "./layout.module.css";
 import MenuWare from "./components/menu/MenuWare";
 import MenuAcc from "./components/menu/MenuAcc";
 import MenuTech from "./components/menu/MenuTech";
+import MainFooter from "./components/Footer";
 
 function MainLayout({ children, type }) {
   function getMenu() {
@@ -53,17 +54,7 @@ function MainLayout({ children, type }) {
           {children}
         </div>
       </Content>
-      <Footer
-        style={{
-          textAlign: "center",
-        }}
-      >
-        Mazarina Trade Company ©{new Date().getFullYear()} Powered by{" "}
-        <a href="https://agshin.dev/" style={{ fontWeight: 700 }}>
-          agshin
-          <span style={{ color: "#6E06F2", fontSize: "16px" }}>.dev</span>
-        </a>
-      </Footer>
+      <MainFooter />
     </Layout>
   );
 }
