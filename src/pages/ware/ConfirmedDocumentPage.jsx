@@ -1,4 +1,4 @@
-import { DatePicker, Table, Tag } from "antd";
+import { Button, DatePicker, Form, Select, Table, Tag } from "antd";
 import Search from "antd/es/input/Search";
 import { useEffect, useState } from "react";
 import {
@@ -9,12 +9,15 @@ import {
 import { useFiches } from "../../context/FichesContext";
 import LinkFileToFicheModal from "../../components/modal/LinkFileToFicheModal";
 import { useAuth } from "../../context/AuthContext";
+import { FileExcelOutlined } from "@ant-design/icons";
+import { utils, writeFile } from "xlsx";
 const { RangePicker } = DatePicker;
 
 function ConfirmedDocumentPage() {
   const { user } = useAuth();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const { setLinkFileIsOpen, setSelectedUnlinkFiche } = useFiches();
 
   const getFiches = async () => {
@@ -24,17 +27,21 @@ function ConfirmedDocumentPage() {
     setLoading(false);
   };
 
-  const onSearch = async (e) => {
-    const data = await fetchUnlinkFichesBySearch(e, user.TOKEN);
+  const onSearch = async (param) => {
+    const data = await fetchUnlinkFichesBySearch(param.value, user.TOKEN);
     setDataSource(data);
   };
 
-  const handleRange = async (range) => {
-    if (range[0] === "") {
-      getFiches();
-    }
+  const handleFilter = async (param) => {
     setLoading(true);
-    const data = await fetchUnlinkFichesByRange({ ...range }, user.TOKEN);
+    const data = await fetchUnlinkFichesByRange(
+      {
+        from: new Date(param.date[0].$d).toLocaleDateString("az"),
+        to: new Date(param.date[1].$d).toLocaleDateString("az"),
+        region: param.region,
+      },
+      user.TOKEN
+    );
     setDataSource(data);
     setLoading(false);
   };
@@ -42,6 +49,27 @@ function ConfirmedDocumentPage() {
   const openFicheModal = async (record) => {
     setSelectedUnlinkFiche(record);
     setLinkFileIsOpen(true);
+  };
+
+  const getExportData = () => {
+    return dataSource.map((fiche) => ({
+      "MÜŞTƏRİ KODU": fiche.CODE, // Customize column name
+      AÇIQLAMA: fiche.DEFINITION_,
+      "SƏNƏD NÖMRƏSİ": fiche.FICHENO,
+      TƏSLİMAT: fiche.TESLIMAT,
+      NET: fiche.NETTOTAL,
+      TARİX: new Date(fiche.DATE_).toLocaleDateString("az"),
+    }));
+  };
+
+  const handleExport = async () => {
+    setExportLoading(true);
+    const data = getExportData();
+    const worksheet = utils.json_to_sheet(data);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, "Skan edilməyənlər");
+    writeFile(workbook, "unlink-fiches.xlsx");
+    setExportLoading(false);
   };
 
   useEffect(() => {
@@ -96,6 +124,18 @@ function ConfirmedDocumentPage() {
       ),
     },
     {
+      title: "Bölgə",
+      dataIndex: "REGION",
+      key: "REGION",
+      render: (_, { REGION }) => (
+        <>
+          <Tag color={"blue"} key={REGION}>
+            {REGION}
+          </Tag>
+        </>
+      ),
+    },
+    {
       title: "Müştəri kodu",
       dataIndex: "CODE",
       key: "CODE",
@@ -128,30 +168,121 @@ function ConfirmedDocumentPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       <div className="flex gap-2 justify-between items-center">
-        <div>
-          <label>Axtarış</label>
-          <Search
-            placeholder="İrsaliyə nömrəsi"
-            onSearch={onSearch}
-            style={{
-              marginTop: "5px",
-            }}
-            size="middle"
-          />
-        </div>
+        <Form layout="vertical" onFinish={onSearch} autoComplete="off">
+          <Form.Item
+            label="Axtarış"
+            name="value"
+            className="w-full"
+            rules={[
+              {
+                required: true,
+                message: "Xananı doldurun",
+              },
+            ]}
+          >
+            <Search
+              placeholder="İrsaliyə nömrəsi və ya müştəri kodu"
+              size="middle"
+            />
+          </Form.Item>
+        </Form>
 
         <div className="flex gap-1">
-          <RangePicker
-            placeholder={["Başlanğıc", "Son"]}
-            onChange={(_, info) => handleRange(info)}
-          />
+          <Form
+            layout="vertical"
+            initialValues={{
+              remember: true,
+              region: 0,
+            }}
+            onFinish={handleFilter}
+            autoComplete="off"
+          >
+            <div className="flex gap-1">
+              <Form.Item
+                label="Bölgə"
+                name="region"
+                className="w-full"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your username!",
+                  },
+                ]}
+              >
+                <Select
+                  options={[
+                    {
+                      value: 0,
+                      label: "Bakı",
+                    },
+                    {
+                      value: 3,
+                      label: "Lənkəran",
+                    },
+                    {
+                      value: 4,
+                      label: "Bərdə",
+                    },
+                    {
+                      value: 5,
+                      label: "Göyçay",
+                    },
+                    {
+                      value: 6,
+                      label: "Xaçmaz",
+                    },
+                    {
+                      value: 7,
+                      label: "Şəki",
+                    },
+                    {
+                      value: 9,
+                      label: "Gəncə",
+                    },
+                    {
+                      value: 11,
+                      label: "Şirvan",
+                    },
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Tarix"
+                name="date"
+                className="w-full"
+                rules={[
+                  {
+                    required: true,
+                    message: "Input your value",
+                  },
+                ]}
+              >
+                <RangePicker placeholder={["Başlanğıc", "Son"]} />
+              </Form.Item>
+              <Form.Item className="self-end">
+                <Button type="primary" htmlType="submit">
+                  Axtar
+                </Button>
+              </Form.Item>
+            </div>
+          </Form>
         </div>
       </div>
 
       <div className="flex flex-col gap-1">
-        <p className="label_process">TƏSDİQ EDİLMİŞ SƏNƏDLƏR</p>
+        <div className="flex justify-between items-center">
+          <p className="label_process">TƏSLİMAT TƏSDİQLİ SƏNƏDLƏR</p>
+          <Button
+            icon={<FileExcelOutlined />}
+            onClick={handleExport}
+            loading={exportLoading}
+          >
+            Excel
+          </Button>
+        </div>
+
         <div className="flex flex-col gap-1">
           <Table
             columns={columns}

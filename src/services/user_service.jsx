@@ -1,24 +1,13 @@
-import { message } from "antd";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 export async function fetchUserLogin(username, password) {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_APP_API}/auth/login?u=${username}&p=${password}`,
-      {
-        method: "POST",
-      }
+    const res = await axios.post(
+      `${import.meta.env.VITE_APP_API}/auth/login?u=${username}&p=${password}`
     );
-
-    if (response.status === 200) {
-      return response.json();
-    } else if (response.status === 401) {
-      message.error(await response.text());
-      return false;
-    } else if (response.status === 500) {
-      message.error(`Server xətası: ${await response.text()}`);
-      return false;
-    }
+    return res.data;
   } catch (error) {
-    console.error(error);
+    toast.error(error.response.data);
   }
 }

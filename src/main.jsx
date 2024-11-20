@@ -19,10 +19,12 @@ import ClientsPage from "./pages/acc/ClientsPage.jsx";
 import TechApp from "./TechApp.jsx";
 import ActPage from "./pages/tech/ActPage.jsx";
 import HandoverPage from "./pages/tech/HandoverPage.jsx";
+import ErrorPage from "./pages/ErrorPage.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
     element: <RoutePage />,
+    errorElement: <ErrorPage />,
   },
   {
     path: "/ware",
@@ -31,6 +33,7 @@ const router = createBrowserRouter([
         <WarehouseApp />
       </PrivateRoute>
     ),
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
@@ -57,6 +60,7 @@ const router = createBrowserRouter([
         <AccountingApp />
       </PrivateRouteAcc>
     ),
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
@@ -71,6 +75,7 @@ const router = createBrowserRouter([
         <TechApp />
       </PrivateRouteAcc>
     ),
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,

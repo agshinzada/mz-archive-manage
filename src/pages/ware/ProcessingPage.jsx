@@ -13,10 +13,10 @@ function ProcessingPage() {
   const { user } = useAuth();
   const [fiches, setFiches] = useState([]);
   const [loading, setLoading] = useState(false);
-  let successProcess = fiches.filter(
+  let successProcess = fiches?.filter(
     (record) => record.READ_STATUS === 1
   ).length;
-  let unreadProcess = fiches.filter(
+  let unreadProcess = fiches?.filter(
     (record) => record.READ_STATUS === 0
   ).length;
 

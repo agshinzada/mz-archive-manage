@@ -1,8 +1,7 @@
-import { Button, DatePicker, Popconfirm, Select, Table, Tag } from "antd";
+import { Button, DatePicker, Form, Popconfirm, Select, Table, Tag } from "antd";
 import Search from "antd/es/input/Search";
 import { useFiches } from "../../context/FichesContext";
 import {
-  fetchFicheDetailByCode,
   fetchFicheFileListByCode,
   fetchFiches,
   fetchFichesByRange,
@@ -17,6 +16,7 @@ import {
 } from "../../services/file_service";
 import { saveAs } from "file-saver";
 import UpdateUnreadFileModal from "../../components/modal/UpdateUnreadFileModal";
+import { fetchDelivery } from "../../services/delivery_service";
 const { RangePicker } = DatePicker;
 
 function FichesPage() {
@@ -31,7 +31,8 @@ function FichesPage() {
     setSelectedFicheForLinkToFile,
     linkFicheToFileIsOpen,
   } = useFiches();
-  const [loading, setLoading] = useState();
+  const [loading, setLoading] = useState(false);
+  const [delivery, setDelivery] = useState([]);
 
   const getFiches = async () => {
     setLoading(true);
@@ -41,23 +42,18 @@ function FichesPage() {
   };
 
   async function openFicheModal(record) {
-    const data = await fetchFicheDetailByCode(
-      record.FICHENO,
-      record.TRCODE,
-      user.TOKEN
-    );
     const fileList = await fetchFicheFileListByCode(
       record.FICHENO,
       record.TRCODE,
       user.TOKEN
     );
     setSelectedFicheFileList(fileList);
-    setSelectedFiche(...data);
+    setSelectedFiche(record);
     setFicheDetailIsOpen(true);
   }
 
   async function onSearch(params) {
-    const data = await fetchFichesBySearch(params, user.TOKEN);
+    const data = await fetchFichesBySearch(params.value, user.TOKEN);
     setFiches(data);
   }
 
@@ -68,27 +64,36 @@ function FichesPage() {
   }
 
   async function deleteFiche(param) {
-    const res = await fetchRemoveFile(param, user.TOKEN);
+    await fetchRemoveFile(param, user.TOKEN);
     getFiches();
   }
 
-  async function handleRange(range) {
-    if (range[0] === "") {
-      getFiches();
-    }
+  const handleFilter = async (param) => {
     setLoading(true);
-    const data = await fetchFichesByRange({ ...range }, user.TOKEN);
+    const data = await fetchFichesByRange(
+      {
+        from: new Date(param.date[0].$d).toLocaleDateString("az"),
+        to: new Date(param.date[1].$d).toLocaleDateString("az"),
+        delivery: param.delivery,
+      },
+      user.TOKEN
+    );
     setFiches(data);
     setLoading(false);
-  }
+  };
 
-  async function openLinkedModal(record) {
+  function openLinkedModal(record) {
     setSelectedFicheForLinkToFile(record);
     setLinkFicheToFileIsOpen(true);
+  }
+  async function getDelivery() {
+    const data = await fetchDelivery(user.TOKEN);
+    setDelivery(data);
   }
 
   useEffect(() => {
     getFiches();
+    getDelivery();
   }, []);
 
   useEffect(() => {
@@ -99,7 +104,12 @@ function FichesPage() {
 
   const columns = [
     {
-      title: "NÖMRƏ",
+      title: "Müştəri Kodu",
+      dataIndex: "CODE",
+      key: "CODE",
+    },
+    {
+      title: "Sənəd nömrəsi",
       dataIndex: "FICHENO",
       key: "FICHENO",
       render: (_, record) => (
@@ -140,25 +150,37 @@ function FichesPage() {
       ),
     },
     {
-      title: "SƏNƏD NÖVÜ",
+      title: "Sənəd növü",
       dataIndex: "TRCODE",
       key: "TRCODE",
       render: (_, { TRCODE }) => (
         <>
-          {TRCODE !== 0 ? (
+          {TRCODE === 8 ? (
             <Tag color={"blue"} key={TRCODE}>
               {"SATIŞ"}
             </Tag>
           ) : (
-            <Tag color={"blue"} key={TRCODE}>
+            ""
+          )}
+          {TRCODE === 3 ? (
+            <Tag color={"green"} key={TRCODE}>
+              {"QAYTARMA"}
+            </Tag>
+          ) : (
+            ""
+          )}
+          {TRCODE === 0 ? (
+            <Tag color={"red"} key={TRCODE}>
               0
             </Tag>
+          ) : (
+            ""
           )}
         </>
       ),
     },
     {
-      title: "FAYL ADI",
+      title: "Fayl adı",
       dataIndex: "FILENAME",
       key: "FILENAME",
       render: (_, record) => (
@@ -180,30 +202,24 @@ function FichesPage() {
       ),
     },
     {
-      title: "TARİX",
+      title: "Təslimat",
+      dataIndex: "TESLIMAT",
+      key: "TESLIMAT",
+    },
+    {
+      title: "İrsaliyə tarixi",
+      dataIndex: "FICHE_DATE",
+      key: "FICHE_DATE",
+      render: (_, { FICHE_DATE }) => (
+        <>{new Date(FICHE_DATE).toLocaleDateString("az")}</>
+      ),
+    },
+    {
+      title: "Yüklənmə tarixi",
       dataIndex: "INSERT_DATE",
       key: "INSERT_DATE",
       render: (_, { INSERT_DATE }) => (
         <>{new Date(INSERT_DATE).toLocaleDateString("az")}</>
-      ),
-      sorter: (a, b) => a.INSERT_DATE - b.INSERT_DATE,
-    },
-    {
-      title: "STATUS",
-      dataIndex: "STATUS",
-      key: "STATUS",
-      render: (_, { STATUS }) => (
-        <>
-          {STATUS === 0 ? (
-            <Tag color={"blue"} key={STATUS}>
-              {"AKTIV"}
-            </Tag>
-          ) : (
-            <Tag color={"red"} key={STATUS}>
-              {"PASSIV"}
-            </Tag>
-          )}
-        </>
       ),
     },
   ];
@@ -211,30 +227,86 @@ function FichesPage() {
   return (
     <div>
       <div>
-        <div className="flex gap-1 justify-between mb-2 items-center">
-          <div>
-            <label>Axtarış</label>
-            <Search
-              placeholder="İrsaliyə nömrəsi"
-              onSearch={onSearch}
-              style={{
-                marginTop: "5px",
-              }}
-              size="middle"
-            />
-          </div>
+        <div className="flex justify-between items-center">
+          <Form layout="vertical" onFinish={onSearch} autoComplete="off">
+            <Form.Item
+              label="Axtarış"
+              name="value"
+              className="w-full"
+              rules={[
+                {
+                  required: true,
+                  message: "Xananı doldurun",
+                },
+              ]}
+            >
+              <Search
+                placeholder="İrsaliyə nömrəsi və ya müştəri kodu"
+                size="middle"
+              />
+            </Form.Item>
+          </Form>
           <div className="flex gap-1">
-            <RangePicker
-              placeholder={["Başlanğıc", "Son"]}
-              onChange={(_, info) => handleRange(info)}
-            />
+            <Form
+              layout="vertical"
+              initialValues={{
+                delivery: "2001",
+              }}
+              onFinish={handleFilter}
+              autoComplete="off"
+            >
+              <div className="flex gap-1">
+                <Form.Item
+                  label="Təslimat"
+                  name="delivery"
+                  className="w-full"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your username!",
+                    },
+                  ]}
+                >
+                  <Select
+                    options={delivery}
+                    filterOption={(input, option) =>
+                      (option?.CODE ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    fieldNames={{
+                      label: "CODE",
+                      value: "CODE",
+                    }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="İrsaliyə tarixi"
+                  name="date"
+                  className="w-full"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Input your value",
+                    },
+                  ]}
+                >
+                  <RangePicker placeholder={["Başlanğıc", "Son"]} />
+                </Form.Item>
+                <Form.Item className="self-end">
+                  <Button type="primary" htmlType="submit">
+                    Axtar
+                  </Button>
+                </Form.Item>
+              </div>
+            </Form>
           </div>
         </div>
 
         <Table
           columns={columns}
           dataSource={fiches}
-          rowKey={(record) => record.ID}
+          rowKey={(record) => record.Row}
           loading={loading}
           pagination={{ pageSize: 50 }}
         />

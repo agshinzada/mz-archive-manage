@@ -5,6 +5,7 @@ import MenuWare from "./components/menu/MenuWare";
 import MenuAcc from "./components/menu/MenuAcc";
 import MenuTech from "./components/menu/MenuTech";
 import MainFooter from "./components/Footer";
+import { Toaster } from "react-hot-toast";
 
 function MainLayout({ children, type }) {
   function getMenu() {
@@ -33,7 +34,7 @@ function MainLayout({ children, type }) {
       >
         <a href="/" className={styles.logo}>
           <img src="/logo.svg" style={{ width: "24px", marginRight: "7px" }} />
-          <p>archive</p>
+          <p>ARXİV İDARƏETMƏ PANELİ</p>
         </a>
         {getMenu()}
       </Header>
@@ -55,6 +56,7 @@ function MainLayout({ children, type }) {
         </div>
       </Content>
       <MainFooter />
+      <Toaster position="top-right" reverseOrder={false} />
     </Layout>
   );
 }

@@ -1,46 +1,37 @@
-import { notification } from "antd";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 export const fetchHandovers = async (token) => {
-  const res = await fetch(
-    `${import.meta.env.VITE_APP_API}/handovers?token=${token}`
-  );
-  if (res.status === 500) {
-    notification.error({
-      placement: "topRight",
-      message: "Sistem xətası",
-      description: await res.text(),
-    });
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_APP_API}/handovers?token=${token}`
+    );
+    return res.data;
+  } catch (error) {
+    toast.error(error.response.data);
   }
-  const data = await res.json();
-  return data;
 };
 
 export const fetchHandoverBySearch = async (value, token) => {
-  const res = await fetch(
-    `${import.meta.env.VITE_APP_API}/handovers/search?s=${value}&token=${token}`
-  );
-  if (res.status === 500) {
-    notification.error({
-      placement: "topRight",
-      message: "Sistem xətası",
-      description: await res.text(),
-    });
+  try {
+    const res = await axios.get(
+      `${
+        import.meta.env.VITE_APP_API
+      }/handovers/search?s=${value}&token=${token}`
+    );
+    return res.data;
+  } catch (error) {
+    toast.error(error.response.data);
   }
-  const data = await res.json();
-  return data;
 };
 
 export const fetchHandoverTypes = async (token) => {
-  const res = await fetch(
-    `${import.meta.env.VITE_APP_API}/handovers/types?token=${token}`
-  );
-  if (res.status === 500) {
-    notification.error({
-      placement: "topRight",
-      message: "Sistem xətası",
-      description: await res.text(),
-    });
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_APP_API}/handovers/types?token=${token}`
+    );
+    return res.data;
+  } catch (error) {
+    toast.error(error.response.data);
   }
-  const data = await res.json();
-  return data;
 };

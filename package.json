@@ -12,7 +12,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.3.0",
     "antd": "^5.14.2",
-    "axios": "^1.6.7",
+    "axios": "^1.7.7",
     "dayjs": "^1.11.10",
     "encrypt-storage": "^2.12.22",
     "file-saver": "^2.0.5",
@@ -20,9 +20,12 @@
     "hash.js": "^1.1.7",
     "jszip": "^3.10.1",
     "path": "^0.12.7",
+    "pdf-lib": "^1.17.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.1"
+    "react-hot-toast": "^2.4.1",
+    "react-router-dom": "^6.22.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.56",

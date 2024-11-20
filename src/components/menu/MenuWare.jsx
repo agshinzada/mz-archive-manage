@@ -19,18 +19,19 @@ function MenuWare() {
     },
     {
       key: 3,
-      label: "Təsdiqlənmiş sənədlər",
+      label: "Arxivsiz sənədlər",
       target: `invoices/approved`,
     },
     {
       key: 4,
-      label: "Təsdiq gözləyən sənədlər",
+      label: "Təsdiqsiz sənədlər",
       target: `invoices/unconfirmed`,
     },
   ];
 
   const handleMenuClick = ({ key }) => {
     const { target } = menuItems.find((item) => item.key == key) || {};
+    localStorage.setItem("menuId", key);
     if (target) {
       navigate(target);
     }
@@ -45,7 +46,7 @@ function MenuWare() {
       <Menu
         theme="dark"
         mode="horizontal"
-        defaultSelectedKeys={["1"]}
+        defaultSelectedKeys={[localStorage.getItem("menuId") || "1"]}
         onClick={handleMenuClick}
         items={menuItems}
         style={{
