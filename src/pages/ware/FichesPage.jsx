@@ -1,11 +1,22 @@
-import { Button, DatePicker, Form, Popconfirm, Select, Table, Tag } from "antd";
-import Search from "antd/es/input/Search";
+import {
+  Button,
+  Collapse,
+  DatePicker,
+  Form,
+  Input,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+  Tag,
+} from "antd";
 import { useFiches } from "../../context/FichesContext";
 import {
   fetchFicheFileListByCode,
   fetchFiches,
   fetchFichesByRange,
   fetchFichesBySearch,
+  fetchFichesCount,
 } from "../../services/fiches_service";
 import FicheDetailModal from "../../components/modal/FIcheDetailModal";
 import { useAuth } from "../../context/AuthContext";
@@ -32,11 +43,16 @@ function FichesPage() {
     linkFicheToFileIsOpen,
   } = useFiches();
   const [loading, setLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [delivery, setDelivery] = useState([]);
+  const [fichesCount, setFichesCount] = useState({ TOTAL: 0, TODAY: 0 });
 
   const getFiches = async () => {
     setLoading(true);
-    const data = await fetchFiches(user.TOKEN);
+    let data = await fetchFiches(user.TOKEN);
+    if (user.ROLE === "USER") {
+      data = data.filter((item) => item.TRCODE === 8);
+    }
     setFiches(data);
     setLoading(false);
   };
@@ -53,15 +69,30 @@ function FichesPage() {
   }
 
   async function onSearch(params) {
+    setLoading(true);
     const data = await fetchFichesBySearch(params.value, user.TOKEN);
     setFiches(data);
+    setLoading(false);
   }
 
   async function downloadFile(param) {
+    setDownloadLoading(true);
     const data = await fetchDownloadFiles(param, user.TOKEN);
     const blob = new Blob([data], { type: "application/octet-stream" });
     saveAs(blob, param);
+    setDownloadLoading(false);
   }
+
+  const handleViewFile = async (name) => {
+    setLoading(true);
+    const data = await fetchDownloadFiles(name, user.TOKEN);
+    if (data) {
+      const blob = new Blob([data], { type: "image/jpeg" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    }
+    setLoading(false);
+  };
 
   async function deleteFiche(param) {
     await fetchRemoveFile(param, user.TOKEN);
@@ -91,8 +122,14 @@ function FichesPage() {
     setDelivery(data);
   }
 
+  async function getFichesCount() {
+    const data = await fetchFichesCount(user.TOKEN);
+    setFichesCount(...data);
+  }
+
   useEffect(() => {
     getFiches();
+    getFichesCount();
     getDelivery();
   }, []);
 
@@ -107,6 +144,11 @@ function FichesPage() {
       title: "Müştəri Kodu",
       dataIndex: "CODE",
       key: "CODE",
+    },
+    {
+      title: "Müştəri Adı",
+      dataIndex: "DEFINITION_",
+      key: "DEFINITION_",
     },
     {
       title: "Sənəd nömrəsi",
@@ -149,6 +191,7 @@ function FichesPage() {
         </>
       ),
     },
+
     {
       title: "Sənəd növü",
       dataIndex: "TRCODE",
@@ -191,9 +234,10 @@ function FichesPage() {
               size="small"
               type="primary"
               className="ml-1"
-              onClick={() => downloadFile(record.FILENAME)}
+              onClick={() => handleViewFile(record.FILENAME)}
+              loading={downloadLoading}
             >
-              Yüklə
+              Baxış
             </Button>
           ) : (
             ""
@@ -224,9 +268,54 @@ function FichesPage() {
     },
   ];
 
+  const filteredColumns = columns.filter((column) => {
+    if (user.ROLE === "USER" && column.key === "FILENAME") {
+      return false;
+    } else if (user.ROLE !== "USER" && column.key === "DEFINITION_") {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <div>
       <div>
+        <Collapse
+          size="small"
+          items={[
+            {
+              key: 1,
+              label: `Ümumi sənəd sayı: ${fichesCount?.TOTAL}`,
+              // children: (
+              //   <div className="flex flex-col gap-1 font-bold">
+              //     <p>Regular (TT): 300</p>
+              //     <p>Horeca (HR): 50</p>
+              //     <p>Şəbəkə (KA): 100</p>
+              //   </div>
+              // ),
+            },
+            {
+              key: 2,
+              label: `Bu gün: ${fichesCount?.TODAY}`,
+              // children: (
+              //   <div className="flex flex-col gap-1 font-bold">
+              //     <p>Regular (TT): 300</p>
+              //     <p>Horeca (HR): 50</p>
+              //     <p>Şəbəkə (KA): 100</p>
+              //   </div>
+              // ),
+            },
+          ]}
+          style={{
+            width: 500,
+            marginBottom: "1rem",
+            fontSize: "12px",
+            backgroundColor: "transparent",
+            border: "1px solid #efefef",
+            fontWeight: "bold",
+          }}
+        />
+
         <div className="flex justify-between items-center">
           <Form layout="vertical" onFinish={onSearch} autoComplete="off">
             <Form.Item
@@ -240,10 +329,12 @@ function FichesPage() {
                 },
               ]}
             >
-              <Search
-                placeholder="İrsaliyə nömrəsi və ya müştəri kodu"
-                size="middle"
-              />
+              <Space.Compact>
+                <Input placeholder="İrsaliyə və ya müştəri kodu" />
+                <Button type="primary" htmlType="submit">
+                  Axtar
+                </Button>
+              </Space.Compact>
             </Form.Item>
           </Form>
           <div className="flex gap-1">
@@ -304,7 +395,7 @@ function FichesPage() {
         </div>
 
         <Table
-          columns={columns}
+          columns={filteredColumns}
           dataSource={fiches}
           rowKey={(record) => record.Row}
           loading={loading}

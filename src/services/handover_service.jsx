@@ -1,5 +1,5 @@
+import { notification } from "antd";
 import axios from "axios";
-import toast from "react-hot-toast";
 
 export const fetchHandovers = async (token) => {
   try {
@@ -8,7 +8,7 @@ export const fetchHandovers = async (token) => {
     );
     return res.data;
   } catch (error) {
-    toast.error(error.response.data);
+    notification.error({ message: error.response.data });
   }
 };
 
@@ -21,7 +21,7 @@ export const fetchHandoverBySearch = async (value, token) => {
     );
     return res.data;
   } catch (error) {
-    toast.error(error.response.data);
+    notification.error({ message: error.response.data });
   }
 };
 
@@ -32,6 +32,6 @@ export const fetchHandoverTypes = async (token) => {
     );
     return res.data;
   } catch (error) {
-    toast.error(error.response.data);
+    notification.error({ message: error.response.data });
   }
 };

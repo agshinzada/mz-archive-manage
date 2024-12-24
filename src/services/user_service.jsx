@@ -1,5 +1,5 @@
+import { notification } from "antd";
 import axios from "axios";
-import toast from "react-hot-toast";
 
 export async function fetchUserLogin(username, password) {
   try {
@@ -8,6 +8,6 @@ export async function fetchUserLogin(username, password) {
     );
     return res.data;
   } catch (error) {
-    toast.error(error.response.data);
+    notification.error({ message: error.response.data });
   }
 }

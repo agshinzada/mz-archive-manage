@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import WarehouseApp from "./WarehouseApp.jsx";
 import "./index.css";
 import "./global.css";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
@@ -9,94 +8,96 @@ import ProcessingPage from "./pages/ware/ProcessingPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import { FichesProvider } from "./context/FichesContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
-import PrivateRoute from "./components/PrivateRoute.jsx";
 import ConfirmedDocumentPage from "./pages/ware/ConfirmedDocumentPage.jsx";
 import UnConfirmedDocumentPage from "./pages/ware/UnConfirmedDocumentPage.jsx";
-import RoutePage from "./pages/RoutePage.jsx";
-import AccountingApp from "./AccountApp.jsx";
-import PrivateRouteAcc from "./components/PrivateRouteAcc.jsx";
-import ClientsPage from "./pages/acc/ClientsPage.jsx";
-import TechApp from "./TechApp.jsx";
-import ActPage from "./pages/tech/ActPage.jsx";
-import HandoverPage from "./pages/tech/HandoverPage.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
+
+import App from "./App.jsx";
+import MainLayout from "./MainLayout.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import ProblemFichesPage from "./pages/ware/ProblemFichesPage.jsx";
+import DuplicateFichesPage from "./pages/ware/DuplicateFichesPage.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <RoutePage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: "/ware",
     element: (
-      <PrivateRoute>
-        <WarehouseApp />
-      </PrivateRoute>
+      <ProtectedRoute allowedRoles={["ADMIN", "MODERATOR", "USER"]}>
+        <MainLayout>
+          <App />
+        </MainLayout>
+      </ProtectedRoute>
     ),
     errorElement: <ErrorPage />,
     children: [
       {
         index: true,
-        element: <ProcessingPage />,
-      },
-      {
-        path: "invoices",
         element: <FichesPage />,
       },
       {
+        path: "processing",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN", "MODERATOR"]}>
+            <ProcessingPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "invoices",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN", "MODERATOR", "USER"]}>
+            <FichesPage />,
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "invoices/approved",
-        element: <ConfirmedDocumentPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN", "MODERATOR"]}>
+            <ConfirmedDocumentPage />,
+          </ProtectedRoute>
+        ),
       },
       {
         path: "invoices/unconfirmed",
-        element: <UnConfirmedDocumentPage />,
-      },
-    ],
-  },
-  {
-    path: "/acc",
-    element: (
-      <PrivateRouteAcc>
-        <AccountingApp />
-      </PrivateRouteAcc>
-    ),
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        index: true,
-        element: <ClientsPage />,
-      },
-    ],
-  },
-  {
-    path: "/tech",
-    element: (
-      <PrivateRouteAcc>
-        <TechApp />
-      </PrivateRouteAcc>
-    ),
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        index: true,
-        element: <ActPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN", "MODERATOR"]}>
+            <UnConfirmedDocumentPage />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: "handover",
-        element: <HandoverPage />,
+        path: "invoices/problems",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <ProblemFichesPage />
+          </ProtectedRoute>
+        ),
       },
+      {
+        path: "invoices/duplicate",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN", "MODERATOR"]}>
+            <DuplicateFichesPage />
+          </ProtectedRoute>
+        ),
+      },
+      // {
+      //   path: "clients",
+      //   element: <ClientsPage />,
+      // },
+      // {
+      //   path: "acts",
+      //   element: <ActPage />,
+      // },
+      // {
+      //   path: "handover",
+      //   element: <HandoverPage />,
+      // },
     ],
   },
+
   {
-    path: "ware/auth/login",
-    element: <LoginPage />,
-  },
-  {
-    path: "acc/auth/login",
-    element: <LoginPage />,
-  },
-  {
-    path: "tech/auth/login",
+    path: "auth/login",
     element: <LoginPage />,
   },
 ]);

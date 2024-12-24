@@ -4,16 +4,11 @@ import { encryptStorage } from "../components/utils/storage";
 const Context = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [routePath, setRoutePath] = useState(
-    encryptStorage.getItem("routePath")
-  );
-  const [user, setUser] = useState(encryptStorage.getItem(`${routePath}User`));
+  const [user, setUser] = useState(encryptStorage.getItem(`user`));
 
   const data = {
     user,
     setUser,
-    routePath,
-    setRoutePath,
   };
 
   return <Context.Provider value={data}>{children}</Context.Provider>;

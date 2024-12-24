@@ -1,4 +1,13 @@
-import { Button, DatePicker, Form, Select, Table, Tag } from "antd";
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  Select,
+  Space,
+  Table,
+  Tag,
+} from "antd";
 import Search from "antd/es/input/Search";
 import { useEffect, useState } from "react";
 import {
@@ -162,10 +171,12 @@ function UnConfirmedDocumentPage() {
               },
             ]}
           >
-            <Search
-              placeholder="İrsaliyə nömrəsi və ya müştəri kodu"
-              size="middle"
-            />
+            <Space.Compact>
+              <Input placeholder="İrsaliyə və ya müştəri kodu" />
+              <Button type="primary" htmlType="submit">
+                Axtar
+              </Button>
+            </Space.Compact>
           </Form.Item>
         </Form>
 

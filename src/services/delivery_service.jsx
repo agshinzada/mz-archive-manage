@@ -1,5 +1,5 @@
+import { notification } from "antd";
 import axios from "axios";
-import toast from "react-hot-toast";
 
 export const fetchDelivery = async (token) => {
   try {
@@ -8,6 +8,6 @@ export const fetchDelivery = async (token) => {
     );
     return res.data;
   } catch (error) {
-    toast.error(error.response.data);
+    notification.error({ message: error.response.data });
   }
 };

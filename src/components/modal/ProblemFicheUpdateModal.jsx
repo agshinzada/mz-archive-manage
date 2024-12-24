@@ -1,81 +1,44 @@
-import { Button, Modal, notification, Upload } from "antd";
+import { Button, Form, Input, Modal, Select } from "antd";
 import { useFiches } from "../../context/FichesContext";
 import styles from "./modal.module.css";
 import {
   FilePdfOutlined,
   FileZipOutlined,
   FolderViewOutlined,
-  UploadOutlined,
 } from "@ant-design/icons";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { useAuth } from "../../context/AuthContext";
-import {
-  fetchDownloadFiles,
-  fetchUploadFiles,
-} from "../../services/file_service";
+import { fetchDownloadFiles } from "../../services/file_service";
 import { PDFDocument } from "pdf-lib";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchUpdateProblemFiche } from "../../services/fiches_service";
 
-function FicheDetailModal() {
+function ProblemUpdateFicheModal({ getData }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [fileList, setFileList] = useState([]);
-  const [uploading, setUploading] = useState(false);
   const {
     ficheDetailIsOpen,
     setFicheDetailIsOpen,
     selectedFiche,
     selectedFicheFileList,
   } = useFiches();
+  const [form] = Form.useForm();
 
-  const props = {
-    onRemove: (file) => {
-      const index = fileList.indexOf(file);
-      const newFileList = fileList.slice();
-      newFileList.splice(index, 1);
-      setFileList(newFileList);
-    },
-    beforeUpload: (file) => {
-      if (file.type === "image/png" || file.type === "image/jpeg") {
-        const newFile = generateName(file);
-        setFileList([...fileList, newFile]);
-        return false;
-      } else {
-        notification.info({
-          placement: "topRight",
-          message: "Sənəd düzəlişi",
-          description: "Fayl tipi düzgün deyil!",
-        });
-        return Upload.LIST_IGNORE;
-      }
-    },
-    fileList,
-  };
-
-  function generateName(file) {
-    try {
-      const ext = file.name.substring(file.name.lastIndexOf("."));
-      const fileName = `${selectedFiche.FICHENO}_${
-        selectedFiche.TRCODE
-      }_M_${Math.random().toString(36).substring(2, 6)}${ext}`;
-      const newFile = new File([file], fileName, { type: file.type });
-      return newFile;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  const handleViewFile = async (name) => {
+  async function handleFiche(params) {
     setLoading(true);
-    const data = await fetchDownloadFiles(name, user.TOKEN);
-    if (data) {
-      const blob = new Blob([data], { type: "image/jpeg" });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-    }
+    await fetchUpdateProblemFiche(
+      {
+        ...params,
+        oldFilePath: selectedFiche.FILEPATH,
+        id: selectedFiche.ID,
+      },
+      user.TOKEN
+    );
+    getData();
+    setFicheDetailIsOpen(false);
     setLoading(false);
-  };
+  }
 
   const handleDownload = async () => {
     setLoading(true);
@@ -89,6 +52,17 @@ function FicheDetailModal() {
     if (zip.length > 0) {
       const zipBlob = await zip.generateAsync({ type: "blob" });
       saveAs(zipBlob, selectedFiche?.FICHENO);
+    }
+    setLoading(false);
+  };
+
+  const handleViewFile = async (name) => {
+    setLoading(true);
+    const data = await fetchDownloadFiles(name, user.TOKEN);
+    if (data) {
+      const blob = new Blob([data], { type: "image/jpeg" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
     }
     setLoading(false);
   };
@@ -147,23 +121,17 @@ function FicheDetailModal() {
     setLoading(false);
   };
 
-  const handleUpload = async () => {
-    const formData = new FormData();
-    fileList.forEach((file) => {
-      formData.append("files[]", file);
-    });
-    formData.append("ficheno", selectedFiche.FICHENO);
-    formData.append("type", selectedFiche.TRCODE);
-    formData.append("token", user.TOKEN);
-    formData.append("readstatus", 1);
-    setUploading(true);
-    const res = await fetchUploadFiles(formData);
-    if (res) {
-      setFileList([]);
-      setFicheDetailIsOpen(false);
+  useEffect(() => {
+    if (selectedFiche) {
+      form.setFieldsValue({
+        ficheno: selectedFiche?.FICHENO,
+        fileName: selectedFiche?.FILENAME,
+        filePath: selectedFiche?.FILEPATH,
+        ficheType: selectedFiche?.TRCODE,
+        status: selectedFiche?.STATUS,
+      });
     }
-    setUploading(false);
-  };
+  }, [selectedFiche, form]);
 
   return (
     <Modal
@@ -175,31 +143,100 @@ function FicheDetailModal() {
       footer={[]}
     >
       <div className={styles.container}>
-        <p className={styles.title}>{selectedFiche?.FICHENO}</p>
-        <div className={styles.grid}>
-          <p>
-            <span>Müştəri adı:</span>
-            <p>{selectedFiche?.DEFINITION_}</p>
-          </p>
-          <p>
-            <span>Müştəri kodu:</span>
-            <p>{selectedFiche?.CODE}</p>
-          </p>
-          <p>
-            <span>Təslimatçı:</span>
-            <p>{selectedFiche?.TESLIMAT}</p>
-          </p>
-          <p>
-            <span>Məbləğ:</span>
-            <p>{selectedFiche?.NETTOTAL}</p>
-          </p>
-          <p>
-            <span>Tarix:</span>
-            <p>
-              {new Date(selectedFiche?.FICHE_DATE).toLocaleDateString("az")}
-            </p>
-          </p>
-        </div>
+        <Form
+          layout="vertical"
+          form={form}
+          initialValues={{
+            remember: false,
+          }}
+          onFinish={handleFiche}
+        >
+          <div className="flex gap-1">
+            <Form.Item
+              label="Sənəd nömrəsi"
+              name="ficheno"
+              className="w-full"
+              rules={[
+                {
+                  required: true,
+                  message: "Required",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Sənəd növü"
+              name={"ficheType"}
+              rules={[
+                {
+                  required: true,
+                  message: "Required",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </div>
+
+          <Form.Item
+            label="Fayl adı"
+            name={"fileName"}
+            rules={[
+              {
+                required: true,
+                message: "Required",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Fayl yolu"
+            name={"filePath"}
+            rules={[
+              {
+                required: true,
+                message: "Required",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Status"
+            name="status"
+            className="w-full"
+            rules={[
+              {
+                required: true,
+                message: "Required",
+              },
+            ]}
+          >
+            <Select
+              options={[
+                {
+                  value: 0,
+                  label: "Aktiv",
+                },
+                {
+                  value: 1,
+                  label: "Deaktiv",
+                },
+                {
+                  value: 2,
+                  label: "Sistemdə yoxdur",
+                },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
         <div className="mt-3">
           <div className="flex justify-between items-center">
             <span className="text-sm">
@@ -235,11 +272,12 @@ function FicheDetailModal() {
             }}
           >
             {Object.keys(selectedFicheFileList).length &&
-              selectedFicheFileList?.map((item, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <div key={item.ID} className="font-bold">
-                    {item.FILENAME}
-                  </div>
+              selectedFicheFileList?.map((item) => (
+                <div
+                  key={item.ID}
+                  className="flex justify-between items-center"
+                >
+                  <div className="font-bold">{item.FILENAME}</div>
                   <Button
                     type="link"
                     icon={<FolderViewOutlined />}
@@ -254,38 +292,9 @@ function FicheDetailModal() {
               ))}
           </div>
         </div>
-        {user.ROLE === "ADMIN" || user.ROLE === "MODERATOR" ? (
-          <div
-            style={{
-              border: "1px solid #efefef",
-              marginTop: "1rem",
-              padding: "10px",
-            }}
-          >
-            <p
-              style={{
-                fontWeight: "500",
-              }}
-            >
-              Əlavə sənəd:
-            </p>
-            <div className={styles.grid1}>
-              <Upload {...props}>
-                <Button icon={<UploadOutlined />}>
-                  Faylı seç <small> (.jpg və ya .png)</small>
-                </Button>
-              </Upload>
-            </div>
-            <Button type="primary" onClick={handleUpload} loading={uploading}>
-              Göndər
-            </Button>
-          </div>
-        ) : (
-          ""
-        )}
       </div>
     </Modal>
   );
 }
 
-export default FicheDetailModal;
+export default ProblemUpdateFicheModal;

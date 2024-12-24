@@ -1,6 +1,5 @@
 import { notification } from "antd";
 import axios from "axios";
-import toast from "react-hot-toast";
 
 export async function fetchUploadFiles(data) {
   try {
@@ -8,9 +7,11 @@ export async function fetchUploadFiles(data) {
       `${import.meta.env.VITE_APP_API}/files/upload/invoice`,
       data
     );
-    return res;
+    notification.success({ message: res.data });
+    return true;
   } catch (error) {
     notification.error({ message: error.response.data });
+    return false;
   }
 }
 
@@ -61,7 +62,7 @@ export async function fetchDownloadFiles(fileName, token) {
     );
     return res.data;
   } catch (error) {
-    toast.error(error.response.statusText);
+    notification.error({ message: error.response.statusText });
     return false;
   }
 }
@@ -78,7 +79,7 @@ export async function fetchDownloadContractFile(fileName, token) {
     );
     return res.data;
   } catch (error) {
-    toast.error(error.response.statusText);
+    notification.error({ message: error.response.statusText });
     return false;
   }
 }
@@ -95,7 +96,7 @@ export async function fetchDownloadActFiles(fileName, token) {
     );
     return res.data;
   } catch (error) {
-    toast.error(error.response.statusText);
+    notification.error({ message: error.response.statusText });
     return false;
   }
 }
@@ -112,7 +113,7 @@ export async function fetchDownloadHandoverFiles(fileName, token) {
     );
     return res.data;
   } catch (error) {
-    toast.error(error.response.statusText);
+    notification.error({ message: error.response.statusText });
     return false;
   }
 }

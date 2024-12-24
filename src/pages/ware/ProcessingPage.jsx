@@ -1,4 +1,4 @@
-import { Avatar, Badge, Button, DatePicker, Table, Tag } from "antd";
+import { Avatar, Badge, Button, Card, DatePicker, Table, Tag } from "antd";
 import {
   fetchFiches,
   fetchProcessingFiches,
@@ -119,42 +119,50 @@ function ProcessingPage() {
           <RangePicker
             placeholder={["Başlanğıc", "Son"]}
             onChange={(_, info) => handleRange(info)}
+            style={{
+              height: "fit-content",
+            }}
           />
         </div>
-        <div className="flex gap-1">
-          <Badge count={successProcess} overflowCount={5000}>
-            <Avatar
-              shape="square"
-              size="large"
-              style={{ backgroundColor: "blue", cursor: "pointer" }}
-              icon={<CheckOutlined />}
-              onClick={async () => {
-                const data = await fetchFiches(user.TOKEN);
-                const filtered = data.filter(
-                  (record) => record.READ_STATUS === 1
-                );
-                setFiches(filtered);
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex gap-1">
+            <div
+              style={{
+                width: 300,
+                height: 45,
+                border: "1px solid #efefef",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
               }}
-            />
-          </Badge>
-          <Badge count={unreadProcess} overflowCount={5000}>
-            <Avatar
-              shape="square"
-              size="large"
-              icon={<CloseOutlined />}
-              style={{ backgroundColor: "red", cursor: "pointer" }}
-              onClick={async () => {
-                const data = await fetchFiches(user.TOKEN);
-                const filtered = data.filter(
-                  (record) => record.READ_STATUS === 0
-                );
-                setFiches(filtered);
+            >
+              <p className="font-bold flex items-center gap-1">
+                Yüklənmiş sənəd sayı:
+                <span className="">{successProcess}</span>
+              </p>
+            </div>
+
+            <div
+              style={{
+                width: 300,
+                height: 45,
+                border: "1px solid #efefef",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                color: "red",
               }}
-            />
-          </Badge>
+            >
+              <p className="font-bold flex items-center gap-1">
+                Oxunmayan sənəd sayı:
+                <span className="">{unreadProcess}</span>
+              </p>
+            </div>
+          </div>
+
           <Button
             type="primary"
-            size="large"
+            size="middle"
             className="w-fit"
             loading={loading}
             onClick={getFiches}
@@ -170,7 +178,7 @@ function ProcessingPage() {
           <Table
             columns={columns}
             dataSource={fiches}
-            pagination={false}
+            pagination={{ pageSize: 100 }}
             rowKey={(record) => record.ID}
             loading={loading}
           />

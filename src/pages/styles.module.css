@@ -12,8 +12,8 @@
 
 .title {
   padding: 1rem;
-  color: blue;
-  border-bottom: 1px solid blue;
+  color: rgb(65, 64, 64);
+  border-bottom: 1px solid rgb(65, 64, 64);
   width: fit-content;
   margin-bottom: 1.5rem;
   text-align: center;
@@ -72,10 +72,10 @@
   display: flex;
   font-size: 1.2rem;
   padding: 1rem;
-  color: blue;
-  text-transform: uppercase;
+  color: rgb(65, 64, 64);
   font-weight: 500;
-  margin-right: 2rem;
+  align-items: center;
+  justify-content: center;
 }
 
 .backButton {

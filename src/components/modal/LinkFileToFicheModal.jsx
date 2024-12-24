@@ -25,25 +25,12 @@ function LinkFileToFicheModal({ getData }) {
     formData.append("readstatus", 1);
     setUploading(true);
     const res = await fetchUploadFiles(formData);
-    setTimeout(async () => {
-      if (res.status === 200) {
-        setFileList([]);
-        notification.success({
-          placement: "topRight",
-          message: "Sənəd düzəlişi",
-          description: await res.text(),
-        });
-        getData();
-      } else {
-        notification.error({
-          placement: "topRight",
-          message: "Sənəd düzəlişi",
-          description: await res.text(),
-        });
-      }
-      setUploading(false);
+    if (res) {
+      setFileList([]);
       setLinkFileIsOpen(false);
-    }, 1000);
+      getData();
+    }
+    setUploading(false);
   };
 
   const props = {

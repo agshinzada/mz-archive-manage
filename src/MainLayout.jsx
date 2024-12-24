@@ -1,21 +1,16 @@
 import { Layout, theme } from "antd";
-import { Content, Footer, Header } from "antd/es/layout/layout";
+import { Content, Header } from "antd/es/layout/layout";
 import styles from "./layout.module.css";
-import MenuWare from "./components/menu/MenuWare";
-import MenuAcc from "./components/menu/MenuAcc";
-import MenuTech from "./components/menu/MenuTech";
 import MainFooter from "./components/Footer";
 import { Toaster } from "react-hot-toast";
+import MenuRoot from "./components/menu/MenuRoot";
+import { Outlet } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
-function MainLayout({ children, type }) {
+function MainLayout() {
+  const { user } = useAuth();
   function getMenu() {
-    if (type === "ware") {
-      return <MenuWare />;
-    } else if (type === "acc") {
-      return <MenuAcc />;
-    } else if (type === "tech") {
-      return <MenuTech />;
-    }
+    return <MenuRoot role={user?.ROLE} />;
   }
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -52,7 +47,7 @@ function MainLayout({ children, type }) {
             marginTop: "1rem",
           }}
         >
-          {children}
+          <Outlet />
         </div>
       </Content>
       <MainFooter />

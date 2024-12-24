@@ -1,10 +1,21 @@
-import { Button, DatePicker, Form, Select, Table, Tag } from "antd";
+import {
+  Button,
+  Collapse,
+  DatePicker,
+  Form,
+  Input,
+  Select,
+  Space,
+  Table,
+  Tag,
+} from "antd";
 import Search from "antd/es/input/Search";
 import { useEffect, useState } from "react";
 import {
   fetchUnlinkFiches,
   fetchUnlinkFichesByRange,
   fetchUnlinkFichesBySearch,
+  fetchUnlinkFichesCount,
 } from "../../services/fiches_service";
 import { useFiches } from "../../context/FichesContext";
 import LinkFileToFicheModal from "../../components/modal/LinkFileToFicheModal";
@@ -16,6 +27,7 @@ const { RangePicker } = DatePicker;
 function ConfirmedDocumentPage() {
   const { user } = useAuth();
   const [dataSource, setDataSource] = useState([]);
+  const [fichesCount, setFichesCount] = useState({ TOTAL: 0, TODAY: 0 });
   const [loading, setLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const { setLinkFileIsOpen, setSelectedUnlinkFiche } = useFiches();
@@ -31,6 +43,11 @@ function ConfirmedDocumentPage() {
     const data = await fetchUnlinkFichesBySearch(param.value, user.TOKEN);
     setDataSource(data);
   };
+
+  async function getFichesCount() {
+    const data = await fetchUnlinkFichesCount(user.TOKEN);
+    setFichesCount(...data);
+  }
 
   const handleFilter = async (param) => {
     setLoading(true);
@@ -74,6 +91,7 @@ function ConfirmedDocumentPage() {
 
   useEffect(() => {
     getFiches();
+    getFichesCount();
   }, []);
 
   const columns = [
@@ -169,6 +187,42 @@ function ConfirmedDocumentPage() {
 
   return (
     <div className="flex flex-col">
+      <Collapse
+        size="small"
+        items={[
+          {
+            key: 1,
+            label: `Ümumi sənəd sayı (BAKI): ${fichesCount.TOTAL}`,
+            // children: (
+            //   <div className="flex flex-col gap-1 font-bold">
+            //     <p>Regular (TT): 300</p>
+            //     <p>Horeca (HR): 50</p>
+            //     <p>Şəbəkə (KA): 100</p>
+            //   </div>
+            // ),
+          },
+          {
+            key: 2,
+            label: `Bu gün (BAKI): ${fichesCount.TODAY}`,
+            // children: (
+            //   <div className="flex flex-col gap-1 font-bold">
+            //     <p>Regular (TT): 300</p>
+            //     <p>Horeca (HR): 50</p>
+            //     <p>Şəbəkə (KA): 100</p>
+            //   </div>
+            // ),
+          },
+        ]}
+        style={{
+          width: 500,
+          marginBottom: "1rem",
+          fontSize: "12px",
+          backgroundColor: "transparent",
+          border: "1px solid #efefef",
+          fontWeight: "bold",
+        }}
+      />
+
       <div className="flex gap-2 justify-between items-center">
         <Form layout="vertical" onFinish={onSearch} autoComplete="off">
           <Form.Item
@@ -182,10 +236,12 @@ function ConfirmedDocumentPage() {
               },
             ]}
           >
-            <Search
-              placeholder="İrsaliyə nömrəsi və ya müştəri kodu"
-              size="middle"
-            />
+            <Space.Compact>
+              <Input placeholder="İrsaliyə və ya müştəri kodu" />
+              <Button type="primary" htmlType="submit">
+                Axtar
+              </Button>
+            </Space.Compact>
           </Form.Item>
         </Form>
 

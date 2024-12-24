@@ -6,34 +6,29 @@ import MainFooter from "../components/Footer";
 import { fetchUserLogin } from "../services/user_service";
 import { useAuth } from "../context/AuthContext";
 import { encryptStorage } from "../components/utils/storage";
-import { sha256 } from "hash.js";
-import { CaretLeftOutlined } from "@ant-design/icons";
-// import { useAuth } from "../../context/AuthContext";
+import bcrypt from "bcryptjs";
 
 function LoginPage() {
-  const { setUser, routePath } = useAuth();
+  const { setUser } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState(null);
-  const [password, setPassword] = useState(null);
+
   const [loading, setLoading] = useState(false);
 
-  async function handleLogin() {
+  async function handleLogin(params) {
     try {
       setLoading(true);
-      if (routePath) {
-        const data = await fetchUserLogin(username, password);
-        if (data) {
-          setUser(data);
-          encryptStorage.setItem(`${routePath}User`, data);
-          setTimeout(() => {
-            setLoading(false);
-            navigate("/" + routePath);
-          }, 1000);
-        } else {
-          setLoading(false);
-        }
-      } else {
+      const hashedPass = bcrypt.hashSync(
+        params.password,
+        "$2a$10$CwTycUXWue0Thq9StjUM0u"
+      );
+      const data = await fetchUserLogin(params.username, hashedPass);
+      if (data) {
+        setUser(data);
+        encryptStorage.setItem(`user`, data);
+        setLoading(false);
         navigate("/");
+      } else {
+        setLoading(false);
       }
     } catch (error) {
       message.error("Login error");
@@ -43,14 +38,11 @@ function LoginPage() {
 
   return (
     <div className={styles.box}>
-      <Button
-        icon={<CaretLeftOutlined />}
-        className={styles.backButton}
-        onClick={() => navigate("/")}
-      >
-        Geri
-      </Button>
       <div className={styles.login_box}>
+        <a href="/" className={styles.logo}>
+          <img src="/logo.svg" style={{ width: "26px", marginRight: "7px" }} />
+          <p>{"Arxiv İdarəetmə Paneli"}</p>
+        </a>
         <p className={styles.title}>Giriş</p>
         <Form
           className={styles.input_box}
@@ -68,7 +60,7 @@ function LoginPage() {
               },
             ]}
           >
-            <Input size="large" onChange={(e) => setUsername(e.target.value)} />
+            <Input size="middle" />
           </Form.Item>
           <Form.Item
             label="Şifrə"
@@ -80,19 +72,13 @@ function LoginPage() {
               },
             ]}
           >
-            <Input
-              size="large"
-              type="password"
-              onChange={(e) => {
-                setPassword(sha256().update(e.target.value).digest("hex"));
-              }}
-            />
+            <Input.Password size="middle" />
           </Form.Item>
           <Form.Item>
             <Button
               type="primary"
-              size="large"
-              style={{ float: "right" }}
+              size="middle"
+              style={{ float: "right", backgroundColor: "rgb(65, 64, 64)" }}
               htmlType="submit"
               loading={loading}
             >
