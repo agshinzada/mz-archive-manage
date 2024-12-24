@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 
 function LoginPage() {
   const { setUser } = useAuth();
+  const { menuItem } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,8 @@ function LoginPage() {
         setUser(data);
         encryptStorage.setItem(`user`, data);
         setLoading(false);
-        navigate("/");
+        const target = JSON.parse(localStorage.getItem("menuItem"))?.target;
+        navigate(target ? `/${target}` : "/invoices");
       } else {
         setLoading(false);
       }

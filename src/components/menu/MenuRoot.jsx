@@ -1,8 +1,10 @@
 import { Button, Menu } from "antd";
 import { useNavigate } from "react-router-dom";
 import { encryptStorage } from "../utils/storage";
+import { useFiches } from "../../context/FichesContext";
 
 function MenuRoot({ role }) {
+  const { menuItem, setMenuItem } = useFiches();
   const navigate = useNavigate();
   const menuItems = [
     {
@@ -45,7 +47,8 @@ function MenuRoot({ role }) {
 
   const handleMenuClick = ({ key }) => {
     const { target } = menuItems.find((item) => item.key == key) || {};
-    localStorage.setItem("menuId", key);
+    localStorage.setItem("menuItem", JSON.stringify({ key, target }));
+    setMenuItem(key);
     if (target) {
       navigate(target);
     }
@@ -60,7 +63,8 @@ function MenuRoot({ role }) {
       <Menu
         theme="dark"
         mode="horizontal"
-        defaultSelectedKeys={[localStorage.getItem("menuId") || "1"]}
+        defaultSelectedKeys={[menuItem.toString()]}
+        selectedKeys={[menuItem.toString()]}
         onClick={handleMenuClick}
         items={menuItems.filter((item) => item.role.includes(role))}
         style={{

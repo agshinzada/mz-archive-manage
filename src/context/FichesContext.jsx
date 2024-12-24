@@ -3,6 +3,9 @@ import { createContext, useState, useContext } from "react";
 const Context = createContext();
 
 export const FichesProvider = ({ children }) => {
+  const [menuItem, setMenuItem] = useState(
+    JSON.parse(localStorage.getItem("menuItem"))?.key || 2
+  );
   const [fiches, setFiches] = useState([]);
   const [ficheDetailIsOpen, setFicheDetailIsOpen] = useState(false);
   const [linkFileIsOpen, setLinkFileIsOpen] = useState(false);
@@ -32,6 +35,8 @@ export const FichesProvider = ({ children }) => {
     setLinkFicheToFileIsOpen,
     selectedFicheForLinkToFile,
     setSelectedFicheForLinkToFile,
+    menuItem,
+    setMenuItem,
   };
 
   return <Context.Provider value={data}>{children}</Context.Provider>;
