@@ -17,6 +17,7 @@ import {
   fetchFichesByRange,
   fetchFichesBySearch,
   fetchFichesCount,
+  fetchUnreadFiches,
 } from "../../services/fiches_service";
 import FicheDetailModal from "../../components/modal/FIcheDetailModal";
 import { useAuth } from "../../context/AuthContext";
@@ -25,9 +26,12 @@ import {
   fetchDownloadFiles,
   fetchRemoveFile,
 } from "../../services/file_service";
-import { saveAs } from "file-saver";
 import UpdateUnreadFileModal from "../../components/modal/UpdateUnreadFileModal";
 import { fetchDelivery } from "../../services/delivery_service";
+import {
+  ExclamationCircleOutlined,
+  FolderViewOutlined,
+} from "@ant-design/icons";
 const { RangePicker } = DatePicker;
 
 function FichesPage() {
@@ -40,19 +44,21 @@ function FichesPage() {
     setSelectedFicheFileList,
     setLinkFicheToFileIsOpen,
     setSelectedFicheForLinkToFile,
-    linkFicheToFileIsOpen,
   } = useFiches();
   const [loading, setLoading] = useState(false);
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const [delivery, setDelivery] = useState([]);
   const [fichesCount, setFichesCount] = useState({ TOTAL: 0, TODAY: 0 });
 
   const getFiches = async () => {
     setLoading(true);
     let data = await fetchFiches(user.TOKEN);
-    if (user.ROLE === "USER") {
-      data = data.filter((item) => item.TRCODE === 8);
-    }
+    setFiches(data);
+    setLoading(false);
+  };
+
+  const getUnreadFiches = async () => {
+    setLoading(true);
+    let data = await fetchUnreadFiches(user.TOKEN);
     setFiches(data);
     setLoading(false);
   };
@@ -75,13 +81,13 @@ function FichesPage() {
     setLoading(false);
   }
 
-  async function downloadFile(param) {
-    setDownloadLoading(true);
-    const data = await fetchDownloadFiles(param, user.TOKEN);
-    const blob = new Blob([data], { type: "application/octet-stream" });
-    saveAs(blob, param);
-    setDownloadLoading(false);
-  }
+  // async function downloadFile(param) {
+  //   setDownloadLoading(true);
+  //   const data = await fetchDownloadFiles(param, user.TOKEN);
+  //   const blob = new Blob([data], { type: "application/octet-stream" });
+  //   saveAs(blob, param);
+  //   setDownloadLoading(false);
+  // }
 
   const handleViewFile = async (name) => {
     setLoading(true);
@@ -96,7 +102,7 @@ function FichesPage() {
 
   async function deleteFiche(param) {
     await fetchRemoveFile(param, user.TOKEN);
-    getFiches();
+    getUnreadFiches();
   }
 
   const handleFilter = async (param) => {
@@ -133,12 +139,6 @@ function FichesPage() {
     getDelivery();
   }, []);
 
-  useEffect(() => {
-    if (!linkFicheToFileIsOpen) {
-      getFiches();
-    }
-  }, [linkFicheToFileIsOpen]);
-
   const columns = [
     {
       title: "Müştəri Kodu",
@@ -159,6 +159,15 @@ function FichesPage() {
           {record.TRCODE === 0 ? (
             <>
               <span key={record.FICHENO}>{record.FICHENO}</span>
+              <Button
+                size="small"
+                type="primary"
+                className="ml-1"
+                onClick={() => handleViewFile(record.FILENAME)}
+                icon={<FolderViewOutlined />}
+              >
+                Fayla baxış
+              </Button>
               <Button
                 size="small"
                 type="primary"
@@ -222,29 +231,29 @@ function FichesPage() {
         </>
       ),
     },
-    {
-      title: "Fayl adı",
-      dataIndex: "FILENAME",
-      key: "FILENAME",
-      render: (_, record) => (
-        <>
-          {record.FILENAME}
-          {record.TRCODE === 0 ? (
-            <Button
-              size="small"
-              type="primary"
-              className="ml-1"
-              onClick={() => handleViewFile(record.FILENAME)}
-              loading={downloadLoading}
-            >
-              Baxış
-            </Button>
-          ) : (
-            ""
-          )}
-        </>
-      ),
-    },
+    // {
+    //   title: "Fayl adı",
+    //   dataIndex: "FILENAME",
+    //   key: "FILENAME",
+    //   render: (_, record) => (
+    //     <>
+    //       {record.FILENAME}
+    //       {record.TRCODE === 0 ? (
+    //         <Button
+    //           size="small"
+    //           type="primary"
+    //           className="ml-1"
+    //           onClick={() => handleViewFile(record.FILENAME)}
+    //           loading={downloadLoading}
+    //         >
+    //           Baxış
+    //         </Button>
+    //       ) : (
+    //         ""
+    //       )}
+    //     </>
+    //   ),
+    // },
     {
       title: "Təslimat",
       dataIndex: "TESLIMAT",
@@ -268,53 +277,68 @@ function FichesPage() {
     },
   ];
 
-  const filteredColumns = columns.filter((column) => {
-    if (user.ROLE === "USER" && column.key === "FILENAME") {
-      return false;
-    } else if (user.ROLE !== "USER" && column.key === "DEFINITION_") {
-      return false;
-    }
-    return true;
-  });
+  // const filteredColumns = columns.filter((column) => {
+  //   if (user.ROLE === "USER" && column.key === "FILENAME") {
+  //     return false;
+  //   } else if (user.ROLE !== "USER" && column.key === "DEFINITION_") {
+  //     return false;
+  //   }
+  //   return true;
+  // });
 
   return (
     <div>
       <div>
-        <Collapse
-          size="small"
-          items={[
-            {
-              key: 1,
-              label: `Ümumi sənəd sayı: ${fichesCount?.TOTAL}`,
-              // children: (
-              //   <div className="flex flex-col gap-1 font-bold">
-              //     <p>Regular (TT): 300</p>
-              //     <p>Horeca (HR): 50</p>
-              //     <p>Şəbəkə (KA): 100</p>
-              //   </div>
-              // ),
-            },
-            {
-              key: 2,
-              label: `Bu gün: ${fichesCount?.TODAY}`,
-              // children: (
-              //   <div className="flex flex-col gap-1 font-bold">
-              //     <p>Regular (TT): 300</p>
-              //     <p>Horeca (HR): 50</p>
-              //     <p>Şəbəkə (KA): 100</p>
-              //   </div>
-              // ),
-            },
-          ]}
-          style={{
-            width: 500,
-            marginBottom: "1rem",
-            fontSize: "12px",
-            backgroundColor: "transparent",
-            border: "1px solid #efefef",
-            fontWeight: "bold",
-          }}
-        />
+        <div className="flex justify-between">
+          <Collapse
+            size="small"
+            items={[
+              {
+                key: 1,
+                label: `Ümumi sənəd sayı: ${fichesCount?.TOTAL}`,
+                // children: (
+                //   <div className="flex flex-col gap-1 font-bold">
+                //     <p>Regular (TT): 300</p>
+                //     <p>Horeca (HR): 50</p>
+                //     <p>Şəbəkə (KA): 100</p>
+                //   </div>
+                // ),
+              },
+              {
+                key: 2,
+                label: `Bu gün: ${fichesCount?.TODAY}`,
+                // children: (
+                //   <div className="flex flex-col gap-1 font-bold">
+                //     <p>Regular (TT): 300</p>
+                //     <p>Horeca (HR): 50</p>
+                //     <p>Şəbəkə (KA): 100</p>
+                //   </div>
+                // ),
+              },
+            ]}
+            style={{
+              width: 500,
+              marginBottom: "1rem",
+              fontSize: "12px",
+              backgroundColor: "transparent",
+              border: "1px solid #efefef",
+              fontWeight: "bold",
+            }}
+          />
+          {user.ROLE !== "USER" ? (
+            <Button
+              size="medium"
+              type="primary"
+              onClick={getUnreadFiches}
+              danger
+              icon={<ExclamationCircleOutlined />}
+            >
+              Oxunmayanlar
+            </Button>
+          ) : (
+            ""
+          )}
+        </div>
 
         <div className="flex justify-between items-center">
           <Form layout="vertical" onFinish={onSearch} autoComplete="off">
@@ -337,6 +361,7 @@ function FichesPage() {
               </Space.Compact>
             </Form.Item>
           </Form>
+
           <div className="flex gap-1">
             <Form
               layout="vertical"
@@ -395,7 +420,7 @@ function FichesPage() {
         </div>
 
         <Table
-          columns={filteredColumns}
+          columns={columns}
           dataSource={fiches}
           rowKey={(record) => record.Row}
           loading={loading}
@@ -403,7 +428,7 @@ function FichesPage() {
         />
       </div>
       <FicheDetailModal />
-      <UpdateUnreadFileModal />
+      <UpdateUnreadFileModal getFiches={getUnreadFiches} />
     </div>
   );
 }

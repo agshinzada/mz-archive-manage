@@ -1,7 +1,6 @@
 import { Button, Modal, Popconfirm, Table, Tag, notification } from "antd";
 import { useFiches } from "../../context/FichesContext";
 import styles from "./modal.module.css";
-import { DownloadOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
 import { useAuth } from "../../context/AuthContext";
@@ -11,7 +10,7 @@ import {
   updateFicheForLinked,
 } from "../../services/fiches_service";
 
-function UpdateUnreadFileModal() {
+function UpdateUnreadFileModal({ getFiches }) {
   const { user } = useAuth();
   const {
     linkFicheToFileIsOpen,
@@ -118,38 +117,12 @@ function UpdateUnreadFileModal() {
   };
 
   const linkFiche = async (record) => {
-    try {
-      setLoading(true);
-      const res = await updateFicheForLinked(
-        record,
-        selectedFicheForLinkToFile,
-        user.TOKEN
-      );
-      if (res.status === 200) {
-        setLoading(false);
-        setLinkFicheToFileIsOpen(false);
-        setDataSource([]);
-        notification.success({
-          placement: "topRight",
-          message: "Sənəd düzəlişi",
-          description: await res.text(),
-        });
-      } else if (res.status === 404) {
-        notification.error({
-          placement: "topRight",
-          message: "Sənəd düzəlişi",
-          description: await res.text(),
-        });
-      } else {
-        notification.error({
-          placement: "topRight",
-          message: "Sənəd düzəlişi",
-          description: await res.text(),
-        });
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    setLoading(true);
+    await updateFicheForLinked(record, selectedFicheForLinkToFile, user.TOKEN);
+    setLoading(false);
+    setDataSource([]);
+    getFiches();
+    setLinkFicheToFileIsOpen(false);
   };
 
   return (
@@ -159,11 +132,13 @@ function UpdateUnreadFileModal() {
       open={linkFicheToFileIsOpen}
       onOk={() => setLinkFicheToFileIsOpen(false)}
       onCancel={() => setLinkFicheToFileIsOpen(false)}
-      footer={[
-        <Button key="back" onClick={() => setLinkFicheToFileIsOpen(false)}>
-          OK
-        </Button>,
-      ]}
+      footer={
+        [
+          // <Button key="back" onClick={() => setLinkFicheToFileIsOpen(false)}>
+          //   OK
+          // </Button>,
+        ]
+      }
       width={"fit-content"}
     >
       <div className={styles.container}>

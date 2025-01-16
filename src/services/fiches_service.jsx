@@ -1,11 +1,22 @@
 import { notification } from "antd";
 import axios from "axios";
-import toast from "react-hot-toast";
 
 export const fetchFiches = async (token) => {
   try {
     const res = await axios.get(
       `${import.meta.env.VITE_APP_API}/fiches?token=${token}`
+    );
+
+    return res.data;
+  } catch (error) {
+    notification.error({ message: error.response.data });
+  }
+};
+
+export const fetchUnreadFiches = async (token) => {
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_APP_API}/fiches/unread?token=${token}`
     );
 
     return res.data;
@@ -241,6 +252,7 @@ export const updateFicheForLinked = async (fiche, file, token) => {
       file,
       token,
     });
+    notification.success({ message: res.data });
     return res;
   } catch (error) {
     notification.error({ message: error.response.data });

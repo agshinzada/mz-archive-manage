@@ -128,7 +128,7 @@ export const fetchRemoveFile = async (file, token) => {
         },
       }
     );
-    return res;
+    notification.success({ message: res.data });
   } catch (error) {
     notification.error({ message: error.response.data });
   }
