@@ -1,5 +1,6 @@
 {
-  "name": "archive-web-app",
+  "name": "mz-archive-manage",
+  "description": "Archive manage is used to show and archive electronic versions of documents used in the ERP database. It allows users to upload these documents in various formats. Additionally, I have developed a service for automatic scanning of documents.",
   "private": true,
   "version": "2.0.0",
   "type": "module",
