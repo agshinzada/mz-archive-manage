@@ -36,6 +36,17 @@ export const fetchFichesCount = async (token) => {
   }
 };
 
+export const fetchFichesCountDetail = async (token) => {
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_APP_API}/fiches/count/detail?token=${token}`
+    );
+    return res.data;
+  } catch (error) {
+    notification.error({ message: error.response.data });
+  }
+};
+
 export const fetchUnlinkFichesCount = async (token) => {
   try {
     const res = await axios.get(
@@ -136,7 +147,6 @@ export const fetchFichesByRange = async (data, token) => {
       `${import.meta.env.VITE_APP_API}/fiches/range?token=${token}`,
       data
     );
-
     return res.data;
   } catch (error) {
     notification.error({ message: error.response.data });

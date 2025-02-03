@@ -3,20 +3,20 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import "./global.css";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import FichesPage from "./pages/ware/FichesPage.jsx";
-import ProcessingPage from "./pages/ware/ProcessingPage.jsx";
+import FichesPage from "./pages/FichesPage.jsx";
+import ProcessingPage from "./pages/ProcessingPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import { FichesProvider } from "./context/FichesContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
-import ConfirmedDocumentPage from "./pages/ware/ConfirmedDocumentPage.jsx";
-import UnConfirmedDocumentPage from "./pages/ware/UnConfirmedDocumentPage.jsx";
+import ConfirmedDocumentPage from "./pages/ConfirmedDocumentPage.jsx";
+import UnConfirmedDocumentPage from "./pages/UnConfirmedDocumentPage.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 
 import App from "./App.jsx";
 import MainLayout from "./MainLayout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import ProblemFichesPage from "./pages/ware/ProblemFichesPage.jsx";
-import DuplicateFichesPage from "./pages/ware/DuplicateFichesPage.jsx";
+import ProblemFichesPage from "./pages/ProblemFichesPage.jsx";
+import DuplicateFichesPage from "./pages/DuplicateFichesPage.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -81,18 +81,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      // {
-      //   path: "clients",
-      //   element: <ClientsPage />,
-      // },
-      // {
-      //   path: "acts",
-      //   element: <ActPage />,
-      // },
-      // {
-      //   path: "handover",
-      //   element: <HandoverPage />,
-      // },
     ],
   },
 

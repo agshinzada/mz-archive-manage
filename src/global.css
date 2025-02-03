@@ -20,6 +20,9 @@
 .justify-between {
   justify-content: space-between;
 }
+.justify-end {
+  justify-content: flex-end;
+}
 
 .items-end {
   align-items: end;
@@ -38,6 +41,10 @@
 
 .text-lg {
   font-size: 18px;
+}
+
+.text-xl {
+  font-size: 20px;
 }
 
 .w-full {
@@ -66,6 +73,9 @@
 .mb-2 {
   margin-bottom: 1.5rem;
 }
+.mb-1 {
+  margin-bottom: 0.5rem;
+}
 
 .text-sm {
   font-size: 14px;
@@ -76,4 +86,32 @@
 
 .w-fit {
   width: fit-content !important;
+}
+
+.opacity-80 {
+  opacity: 0.8;
+}
+
+.text-gray-800 {
+  color: rgb(100, 98, 98);
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.border-b {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.pb-1 {
+  padding-bottom: 0.5rem;
+}
+
+.text-md {
+  font-size: 16px;
 }

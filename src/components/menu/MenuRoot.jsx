@@ -41,7 +41,7 @@ function MenuRoot({ role }) {
       key: 6,
       label: "Təkrar sənədlər",
       target: `invoices/duplicate`,
-      role: ["ADMIN", "MODERATOR"],
+      role: ["ADMIN"],
     },
   ];
 

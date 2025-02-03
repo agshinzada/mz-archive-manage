@@ -1,27 +1,32 @@
 import {
   Button,
+  Col,
   Collapse,
   DatePicker,
   Form,
   Input,
+  Row,
   Select,
   Space,
   Table,
   Tag,
 } from "antd";
-import Search from "antd/es/input/Search";
 import { useEffect, useState } from "react";
 import {
   fetchUnlinkFiches,
   fetchUnlinkFichesByRange,
   fetchUnlinkFichesBySearch,
   fetchUnlinkFichesCount,
-} from "../../services/fiches_service";
-import { useFiches } from "../../context/FichesContext";
-import LinkFileToFicheModal from "../../components/modal/LinkFileToFicheModal";
-import { useAuth } from "../../context/AuthContext";
+} from "../services/fiches_service";
+import { useFiches } from "../context/FichesContext";
+import LinkFileToFicheModal from "../components/modal/LinkFileToFicheModal";
+import { useAuth } from "../context/AuthContext";
 import { FileExcelOutlined } from "@ant-design/icons";
 import { utils, writeFile } from "xlsx";
+import FicheStatisticItem from "../components/FicheStatisticItem";
+import SearchBox from "../components/SearchBox";
+import ConfirmedDocumentPageFilter from "../components/ConfirmedDocumentPageFilter";
+import PageTitle from "../components/PageTitle";
 const { RangePicker } = DatePicker;
 
 function ConfirmedDocumentPage() {
@@ -46,7 +51,7 @@ function ConfirmedDocumentPage() {
 
   async function getFichesCount() {
     const data = await fetchUnlinkFichesCount(user.TOKEN);
-    setFichesCount(...data);
+    setFichesCount(data);
   }
 
   const handleFilter = async (param) => {
@@ -187,149 +192,32 @@ function ConfirmedDocumentPage() {
 
   return (
     <div className="flex flex-col">
-      <Collapse
-        size="small"
-        items={[
-          {
-            key: 1,
-            label: `Ümumi sənəd sayı (BAKI): ${fichesCount.TOTAL}`,
-            // children: (
-            //   <div className="flex flex-col gap-1 font-bold">
-            //     <p>Regular (TT): 300</p>
-            //     <p>Horeca (HR): 50</p>
-            //     <p>Şəbəkə (KA): 100</p>
-            //   </div>
-            // ),
-          },
-          {
-            key: 2,
-            label: `Bu gün (BAKI): ${fichesCount.TODAY}`,
-            // children: (
-            //   <div className="flex flex-col gap-1 font-bold">
-            //     <p>Regular (TT): 300</p>
-            //     <p>Horeca (HR): 50</p>
-            //     <p>Şəbəkə (KA): 100</p>
-            //   </div>
-            // ),
-          },
-        ]}
-        style={{
-          width: 500,
-          marginBottom: "1rem",
-          fontSize: "12px",
-          backgroundColor: "transparent",
-          border: "1px solid #efefef",
-          fontWeight: "bold",
-        }}
-      />
-
+      <PageTitle title="Təsdiqlənmiş sənədlər" />
+      <Row gutter={24} className="w-full mb-2">
+        <Col span={6}>
+          <FicheStatisticItem
+            value={fichesCount.TODAY}
+            loading={loading}
+            title={"Bu gün (BAKI)"}
+          />
+        </Col>
+        <Col span={6}>
+          <FicheStatisticItem
+            value={fichesCount.TOTAL}
+            loading={loading}
+            title={"Ümumi (BAKI)"}
+          />
+        </Col>
+      </Row>
       <div className="flex gap-2 justify-between items-center">
-        <Form layout="vertical" onFinish={onSearch} autoComplete="off">
-          <Form.Item
-            label="Axtarış"
-            name="value"
-            className="w-full"
-            rules={[
-              {
-                required: true,
-                message: "Xananı doldurun",
-              },
-            ]}
-          >
-            <Space.Compact>
-              <Input placeholder="İrsaliyə və ya müştəri kodu" />
-              <Button type="primary" htmlType="submit">
-                Axtar
-              </Button>
-            </Space.Compact>
-          </Form.Item>
-        </Form>
-
-        <div className="flex gap-1">
-          <Form
-            layout="vertical"
-            initialValues={{
-              remember: true,
-              region: 0,
-            }}
-            onFinish={handleFilter}
-            autoComplete="off"
-          >
-            <div className="flex gap-1">
-              <Form.Item
-                label="Bölgə"
-                name="region"
-                className="w-full"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your username!",
-                  },
-                ]}
-              >
-                <Select
-                  options={[
-                    {
-                      value: 0,
-                      label: "Bakı",
-                    },
-                    {
-                      value: 3,
-                      label: "Lənkəran",
-                    },
-                    {
-                      value: 4,
-                      label: "Bərdə",
-                    },
-                    {
-                      value: 5,
-                      label: "Göyçay",
-                    },
-                    {
-                      value: 6,
-                      label: "Xaçmaz",
-                    },
-                    {
-                      value: 7,
-                      label: "Şəki",
-                    },
-                    {
-                      value: 9,
-                      label: "Gəncə",
-                    },
-                    {
-                      value: 11,
-                      label: "Şirvan",
-                    },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Tarix"
-                name="date"
-                className="w-full"
-                rules={[
-                  {
-                    required: true,
-                    message: "Input your value",
-                  },
-                ]}
-              >
-                <RangePicker placeholder={["Başlanğıc", "Son"]} />
-              </Form.Item>
-              <Form.Item className="self-end">
-                <Button type="primary" htmlType="submit">
-                  Axtar
-                </Button>
-              </Form.Item>
-            </div>
-          </Form>
-        </div>
+        <SearchBox
+          handleSearch={onSearch}
+          placeholderText={"İrsaliyə və ya Müştəri kodu"}
+        />
+        <ConfirmedDocumentPageFilter handleFilter={handleFilter} />
       </div>
-
       <div className="flex flex-col gap-1">
-        <div className="flex justify-between items-center">
-          <p className="label_process">TƏSLİMAT TƏSDİQLİ SƏNƏDLƏR</p>
+        <div className="flex justify-end items-center gap-1">
           <Button
             icon={<FileExcelOutlined />}
             onClick={handleExport}
@@ -337,13 +225,13 @@ function ConfirmedDocumentPage() {
           >
             Excel
           </Button>
+          <p className="font-bold">Sətr sayı: {dataSource.length}</p>
         </div>
-
         <div className="flex flex-col gap-1">
           <Table
             columns={columns}
             dataSource={dataSource}
-            pagination={{ pageSize: 100 }}
+            pagination={{ defaultPageSize: 50 }}
             rowKey={(record) => record.LOGICALREF}
             loading={loading}
           />

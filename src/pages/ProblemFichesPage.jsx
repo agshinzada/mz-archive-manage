@@ -1,15 +1,15 @@
 import { Button, Form, Input, Space, Table, Tag } from "antd";
-import { useFiches } from "../../context/FichesContext";
+import { useFiches } from "../context/FichesContext";
 import {
   fetchFicheFileListByCode,
-  fetchFichesBySearch,
   fetchProblemFiches,
   fetchProblemFichesBySearch,
-} from "../../services/fiches_service";
-import { useAuth } from "../../context/AuthContext";
+} from "../services/fiches_service";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
-import ProblemUpdateFicheModal from "../../components/modal/ProblemFicheUpdateModal";
-import { fetchDownloadFiles } from "../../services/file_service";
+import ProblemUpdateFicheModal from "../components/modal/ProblemFicheUpdateModal";
+import SearchBox from "../components/SearchBox";
+import PageTitle from "../components/PageTitle";
 
 function ProblemFichesPage() {
   const { user } = useAuth();
@@ -122,28 +122,13 @@ function ProblemFichesPage() {
 
   return (
     <div>
+      <PageTitle title="Problemli sənədlər" />
       <div>
         <div className="flex justify-between items-center">
-          <Form layout="vertical" onFinish={onSearch} autoComplete="off">
-            <Form.Item
-              label="Axtarış"
-              name="value"
-              className="w-full"
-              rules={[
-                {
-                  required: true,
-                  message: "Xananı doldurun",
-                },
-              ]}
-            >
-              <Space.Compact>
-                <Input placeholder="ID və ya sənəd nömrəsi" />
-                <Button type="primary" htmlType="submit">
-                  Axtar
-                </Button>
-              </Space.Compact>
-            </Form.Item>
-          </Form>
+          <SearchBox
+            handleSearch={onSearch}
+            placeholderText={"ID və ya sənəd nömrəsi"}
+          />
           <Button
             type="primary"
             size="middle"
@@ -154,13 +139,15 @@ function ProblemFichesPage() {
             Yenilə
           </Button>
         </div>
-
+        <div className="flex justify-end mb-1">
+          <p className="font-bold">Sətr sayı: {fiches.length}</p>
+        </div>
         <Table
           columns={columns}
           dataSource={fiches}
           rowKey={(record) => record.Row}
           loading={loading}
-          pagination={{ pageSize: 50 }}
+          pagination={{ defaultPageSize: 50 }}
         />
       </div>
       <ProblemUpdateFicheModal getData={getFiches} />

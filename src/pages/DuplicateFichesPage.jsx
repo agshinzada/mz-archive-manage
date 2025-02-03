@@ -1,13 +1,14 @@
 import { Button, Form, Input, Space, Table, Tag } from "antd";
-import { useFiches } from "../../context/FichesContext";
+import { useFiches } from "../context/FichesContext";
 import {
   fetchDuplicateFiches,
   fetchDuplicateFichesBySearch,
   fetchFicheByFicheNo,
-} from "../../services/fiches_service";
-import { useAuth } from "../../context/AuthContext";
+} from "../services/fiches_service";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
-import DublicateFicheDetailModal from "../../components/modal/DublicateFicheDetailModal";
+import DublicateFicheDetailModal from "../components/modal/DublicateFicheDetailModal";
+import SearchBox from "../components/SearchBox";
 
 function DuplicateFichesPage() {
   const { user } = useAuth();
@@ -115,26 +116,10 @@ function DuplicateFichesPage() {
     <div>
       <div>
         <div className="flex justify-between items-center">
-          <Form layout="vertical" onFinish={onSearch} autoComplete="off">
-            <Form.Item
-              label="Axtarış"
-              name="value"
-              className="w-full"
-              rules={[
-                {
-                  required: true,
-                  message: "Xananı doldurun",
-                },
-              ]}
-            >
-              <Space.Compact>
-                <Input placeholder="ID və ya sənəd nömrəsi" />
-                <Button type="primary" htmlType="submit">
-                  Axtar
-                </Button>
-              </Space.Compact>
-            </Form.Item>
-          </Form>
+          <SearchBox
+            handleSearch={onSearch}
+            placeholderText={"Id və ya sənəd nömrəsi"}
+          />
           <Button
             type="primary"
             size="middle"
@@ -145,13 +130,15 @@ function DuplicateFichesPage() {
             Yenilə
           </Button>
         </div>
-
+        <div className="flex justify-end mb-1">
+          <p className="font-bold">Sətr sayı: {fiches.length}</p>
+        </div>
         <Table
           columns={columns}
           dataSource={fiches}
           rowKey={(record) => record.ID}
           loading={loading}
-          pagination={{ pageSize: 50 }}
+          pagination={{ defaultPageSize: 50 }}
         />
       </div>
       <DublicateFicheDetailModal

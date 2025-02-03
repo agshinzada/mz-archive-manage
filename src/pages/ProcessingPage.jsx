@@ -3,9 +3,9 @@ import {
   fetchFiches,
   fetchProcessingFiches,
   fetchProcessingFichesByRange,
-} from "../../services/fiches_service";
+} from "../services/fiches_service";
 import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 const { RangePicker } = DatePicker;
 
@@ -178,7 +178,7 @@ function ProcessingPage() {
           <Table
             columns={columns}
             dataSource={fiches}
-            pagination={{ pageSize: 100 }}
+            pagination={{ defaultPageSize: 50 }}
             rowKey={(record) => record.ID}
             loading={loading}
           />

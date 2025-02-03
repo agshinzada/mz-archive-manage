@@ -1,8 +1,10 @@
 import {
   Button,
+  Col,
   DatePicker,
   Form,
   Input,
+  Row,
   Select,
   Space,
   Table,
@@ -14,11 +16,15 @@ import {
   fetchUnConfirmedFiches,
   fetchUnConfirmedFichesByRange,
   fetchUnConfirmedFichesBySearch,
-} from "../../services/fiches_service";
-import LinkFileToFicheModal from "../../components/modal/LinkFileToFicheModal";
-import { useAuth } from "../../context/AuthContext";
+} from "../services/fiches_service";
+import LinkFileToFicheModal from "../components/modal/LinkFileToFicheModal";
+import { useAuth } from "../context/AuthContext";
 import { FileExcelOutlined } from "@ant-design/icons";
 import { utils, writeFile } from "xlsx";
+import SearchBox from "../components/SearchBox";
+import UnConfirmedDocumentPageFilter from "../components/UnConfirmedDocumentPageFilter";
+import PageTitle from "../components/PageTitle";
+import FicheStatisticItem from "../components/FicheStatisticItem";
 const { RangePicker } = DatePicker;
 
 function UnConfirmedDocumentPage() {
@@ -158,112 +164,25 @@ function UnConfirmedDocumentPage() {
 
   return (
     <div className="flex flex-col">
+      <PageTitle title="Təsdiq edilməmiş sənədlər" />
+      <Row gutter={24} className="w-full mb-2">
+        <Col span={6}>
+          <FicheStatisticItem
+            value={dataSource.length}
+            loading={loading}
+            title={"Bu gün (BAKI)"}
+          />
+        </Col>
+      </Row>
       <div className="flex gap-2 justify-between items-center">
-        <Form layout="vertical" onFinish={onSearch} autoComplete="off">
-          <Form.Item
-            label="Axtarış"
-            name="value"
-            className="w-full"
-            rules={[
-              {
-                required: true,
-                message: "Xananı doldurun",
-              },
-            ]}
-          >
-            <Space.Compact>
-              <Input placeholder="İrsaliyə və ya müştəri kodu" />
-              <Button type="primary" htmlType="submit">
-                Axtar
-              </Button>
-            </Space.Compact>
-          </Form.Item>
-        </Form>
-
-        <div className="flex gap-1">
-          <Form
-            layout="vertical"
-            initialValues={{
-              region: 0,
-            }}
-            onFinish={handleFilter}
-            autoComplete="off"
-          >
-            <div className="flex gap-1">
-              <Form.Item
-                label="Region"
-                name="region"
-                className="w-full"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your username!",
-                  },
-                ]}
-              >
-                <Select
-                  options={[
-                    {
-                      value: 0,
-                      label: "Bakı",
-                    },
-                    {
-                      value: 3,
-                      label: "Lənkəran",
-                    },
-                    {
-                      value: 4,
-                      label: "Bərdə",
-                    },
-                    {
-                      value: 5,
-                      label: "Göyçay",
-                    },
-                    {
-                      value: 6,
-                      label: "Xaçmaz",
-                    },
-                    {
-                      value: 7,
-                      label: "Şəki",
-                    },
-                    {
-                      value: 9,
-                      label: "Gəncə",
-                    },
-                    {
-                      value: 11,
-                      label: "Şirvan",
-                    },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item
-                label="İrsaliyə tarixi"
-                name="date"
-                className="w-full"
-                rules={[
-                  {
-                    required: true,
-                    message: "Input your value",
-                  },
-                ]}
-              >
-                <RangePicker placeholder={["Başlanğıc", "Son"]} />
-              </Form.Item>
-              <Form.Item className="self-end">
-                <Button type="primary" htmlType="submit">
-                  Axtar
-                </Button>
-              </Form.Item>
-            </div>
-          </Form>
-        </div>
+        <SearchBox
+          handleSearch={onSearch}
+          placeholderText="İrsaliyə və ya müştəri kodu"
+        />
+        <UnConfirmedDocumentPageFilter handleFilter={handleFilter} />
       </div>
-
       <div className="flex flex-col gap-1">
-        <div className="flex justify-between">
-          <p className="label_process">TƏSDİQSİZ SƏNƏDLƏR</p>
+        <div className="flex justify-end gap-1 items-center">
           <Button
             icon={<FileExcelOutlined />}
             onClick={handleExport}
@@ -271,11 +190,13 @@ function UnConfirmedDocumentPage() {
           >
             Excel
           </Button>
+          <p className="font-bold">Sətr sayı: {dataSource.length}</p>
         </div>
+
         <Table
           columns={columns}
           dataSource={dataSource}
-          pagination={{ pageSize: 100 }}
+          pagination={{ defaultPageSize: 50 }}
           rowKey={(record) => record.LOGICALREF}
           loading={loading}
         />

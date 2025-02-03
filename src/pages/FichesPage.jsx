@@ -1,38 +1,27 @@
-import {
-  Button,
-  Collapse,
-  DatePicker,
-  Form,
-  Input,
-  Popconfirm,
-  Select,
-  Space,
-  Table,
-  Tag,
-} from "antd";
-import { useFiches } from "../../context/FichesContext";
+import { Button, Popconfirm, Table, Tag } from "antd";
+import { useFiches } from "../context/FichesContext";
 import {
   fetchFicheFileListByCode,
   fetchFiches,
   fetchFichesByRange,
   fetchFichesBySearch,
   fetchFichesCount,
+  fetchFichesCountDetail,
   fetchUnreadFiches,
-} from "../../services/fiches_service";
-import FicheDetailModal from "../../components/modal/FIcheDetailModal";
-import { useAuth } from "../../context/AuthContext";
+} from "../services/fiches_service";
+import FicheDetailModal from "../components/modal/FIcheDetailModal";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
-import {
-  fetchDownloadFiles,
-  fetchRemoveFile,
-} from "../../services/file_service";
-import UpdateUnreadFileModal from "../../components/modal/UpdateUnreadFileModal";
-import { fetchDelivery } from "../../services/delivery_service";
+import { fetchDownloadFiles, fetchRemoveFile } from "../services/file_service";
+import UpdateUnreadFileModal from "../components/modal/UpdateUnreadFileModal";
 import {
   ExclamationCircleOutlined,
   FolderViewOutlined,
 } from "@ant-design/icons";
-const { RangePicker } = DatePicker;
+import FicheStatistics from "../components/FicheStatistics";
+import SearchBox from "../components/SearchBox";
+import FichePageFilter from "../components/FichePageFilter";
+import PageTitle from "../components/PageTitle";
 
 function FichesPage() {
   const { user } = useAuth();
@@ -46,7 +35,6 @@ function FichesPage() {
     setSelectedFicheForLinkToFile,
   } = useFiches();
   const [loading, setLoading] = useState(false);
-  const [delivery, setDelivery] = useState([]);
   const [fichesCount, setFichesCount] = useState({ TOTAL: 0, TODAY: 0 });
 
   const getFiches = async () => {
@@ -112,6 +100,7 @@ function FichesPage() {
         from: new Date(param.date[0].$d).toLocaleDateString("az"),
         to: new Date(param.date[1].$d).toLocaleDateString("az"),
         delivery: param.delivery,
+        dateParam: param.dateParam,
       },
       user.TOKEN
     );
@@ -123,20 +112,17 @@ function FichesPage() {
     setSelectedFicheForLinkToFile(record);
     setLinkFicheToFileIsOpen(true);
   }
-  async function getDelivery() {
-    const data = await fetchDelivery(user.TOKEN);
-    setDelivery(data);
-  }
 
   async function getFichesCount() {
+    setLoading(true);
     const data = await fetchFichesCount(user.TOKEN);
-    setFichesCount(...data);
+    setFichesCount(data);
+    setLoading(false);
   }
 
   useEffect(() => {
     getFiches();
     getFichesCount();
-    getDelivery();
   }, []);
 
   const columns = [
@@ -231,29 +217,7 @@ function FichesPage() {
         </>
       ),
     },
-    // {
-    //   title: "Fayl adı",
-    //   dataIndex: "FILENAME",
-    //   key: "FILENAME",
-    //   render: (_, record) => (
-    //     <>
-    //       {record.FILENAME}
-    //       {record.TRCODE === 0 ? (
-    //         <Button
-    //           size="small"
-    //           type="primary"
-    //           className="ml-1"
-    //           onClick={() => handleViewFile(record.FILENAME)}
-    //           loading={downloadLoading}
-    //         >
-    //           Baxış
-    //         </Button>
-    //       ) : (
-    //         ""
-    //       )}
-    //     </>
-    //   ),
-    // },
+
     {
       title: "Təslimat",
       dataIndex: "TESLIMAT",
@@ -277,54 +241,19 @@ function FichesPage() {
     },
   ];
 
-  // const filteredColumns = columns.filter((column) => {
-  //   if (user.ROLE === "USER" && column.key === "FILENAME") {
-  //     return false;
-  //   } else if (user.ROLE !== "USER" && column.key === "DEFINITION_") {
-  //     return false;
-  //   }
-  //   return true;
-  // });
-
   return (
     <div>
+      <PageTitle title="Sənədlər" />
       <div>
-        <div className="flex justify-between">
-          <Collapse
-            size="small"
-            items={[
-              {
-                key: 1,
-                label: `Ümumi sənəd sayı: ${fichesCount?.TOTAL}`,
-                // children: (
-                //   <div className="flex flex-col gap-1 font-bold">
-                //     <p>Regular (TT): 300</p>
-                //     <p>Horeca (HR): 50</p>
-                //     <p>Şəbəkə (KA): 100</p>
-                //   </div>
-                // ),
-              },
-              {
-                key: 2,
-                label: `Bu gün: ${fichesCount?.TODAY}`,
-                // children: (
-                //   <div className="flex flex-col gap-1 font-bold">
-                //     <p>Regular (TT): 300</p>
-                //     <p>Horeca (HR): 50</p>
-                //     <p>Şəbəkə (KA): 100</p>
-                //   </div>
-                // ),
-              },
-            ]}
-            style={{
-              width: 500,
-              marginBottom: "1rem",
-              fontSize: "12px",
-              backgroundColor: "transparent",
-              border: "1px solid #efefef",
-              fontWeight: "bold",
-            }}
+        <FicheStatistics data={fichesCount} loading={loading} />
+        <div className="flex justify-between items-center">
+          <SearchBox
+            handleSearch={onSearch}
+            placeholderText={"İrsaliyə və ya müştəri kodu"}
           />
+          <FichePageFilter handleFilter={handleFilter} />
+        </div>
+        <div className="flex justify-between mb-1 items-center">
           {user.ROLE !== "USER" ? (
             <Button
               size="medium"
@@ -338,93 +267,16 @@ function FichesPage() {
           ) : (
             ""
           )}
+          <p className="font-bold justify-self-end">
+            Sətr sayı: {fiches.length}
+          </p>
         </div>
-
-        <div className="flex justify-between items-center">
-          <Form layout="vertical" onFinish={onSearch} autoComplete="off">
-            <Form.Item
-              label="Axtarış"
-              name="value"
-              className="w-full"
-              rules={[
-                {
-                  required: true,
-                  message: "Xananı doldurun",
-                },
-              ]}
-            >
-              <Space.Compact>
-                <Input placeholder="İrsaliyə və ya müştəri kodu" />
-                <Button type="primary" htmlType="submit">
-                  Axtar
-                </Button>
-              </Space.Compact>
-            </Form.Item>
-          </Form>
-
-          <div className="flex gap-1">
-            <Form
-              layout="vertical"
-              initialValues={{
-                delivery: "2001",
-              }}
-              onFinish={handleFilter}
-              autoComplete="off"
-            >
-              <div className="flex gap-1">
-                <Form.Item
-                  label="Təslimat"
-                  name="delivery"
-                  className="w-full"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your username!",
-                    },
-                  ]}
-                >
-                  <Select
-                    options={delivery}
-                    filterOption={(input, option) =>
-                      (option?.CODE ?? "")
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    fieldNames={{
-                      label: "CODE",
-                      value: "CODE",
-                    }}
-                  />
-                </Form.Item>
-                <Form.Item
-                  label="İrsaliyə tarixi"
-                  name="date"
-                  className="w-full"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Input your value",
-                    },
-                  ]}
-                >
-                  <RangePicker placeholder={["Başlanğıc", "Son"]} />
-                </Form.Item>
-                <Form.Item className="self-end">
-                  <Button type="primary" htmlType="submit">
-                    Axtar
-                  </Button>
-                </Form.Item>
-              </div>
-            </Form>
-          </div>
-        </div>
-
         <Table
           columns={columns}
           dataSource={fiches}
-          rowKey={(record) => record.Row}
+          rowKey={(record) => record.ID}
           loading={loading}
-          pagination={{ pageSize: 50 }}
+          pagination={{ defaultPageSize: 50 }}
         />
       </div>
       <FicheDetailModal />
